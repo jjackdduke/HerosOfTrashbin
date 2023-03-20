@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c47b0de284fc0d54d80fb878ffeca7cc, type: 3}
+  m_Name: IceTower
+  m_EditorClassIdentifier: 
+  towerPrefab: {fileID: 5602294575269227299, guid: 7a93bedadc669af4083a5c4f4b4ee061,
+    type: 3}
+  weapon:
+  - Prefab: {fileID: 5602294575269227299, guid: 7a93bedadc669af4083a5c4f4b4ee061,
+      type: 3}
+    Damage: 2
+    rate: 2
+    range: 100
+    cost: 10
+    isParticle: 1
+    spawnPoint: {fileID: 0}
+    effect: {fileID: 2985503615148924496, guid: 387a2c647d434f94780f4664503ec2e5,
+      type: 3}
+    missile: {fileID: 0}
+    missileUp: 0
+  - Prefab: {fileID: 386914449548775791, guid: 999358eb5a93afa45a366e0a03b141ae, type: 3}
+    Damage: 3
+    rate: 2
+    range: 100
+    cost: 20
+    isParticle: 1
+    spawnPoint: {fileID: 0}
+    effect: {fileID: 2985503615148924496, guid: 387a2c647d434f94780f4664503ec2e5,
+      type: 3}
+    missile: {fileID: 0}
+    missileUp: 0
+  - Prefab: {fileID: 6142553789647345545, guid: 3fd56668cc5eafb4fb8a5ef580e03836,
+      type: 3}
+    Damage: 4
+    rate: 2
+    range: 100
+    cost: 30
+    isParticle: 1
+    spawnPoint: {fileID: 0}
+    effect: {fileID: 2985503615148924496, guid: 387a2c647d434f94780f4664503ec2e5,
+      type: 3}
+    missile: {fileID: 0}
+    missileUp: 0
