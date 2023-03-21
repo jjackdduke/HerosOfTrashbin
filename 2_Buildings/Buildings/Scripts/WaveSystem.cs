@@ -19,24 +19,24 @@ public class WaveSystem : MonoBehaviour
         {
             // 인덱스의 시작이 -1이기 때문에 웨이브 인덱스 증가를 제일 먼저 함
             currentWaveIndex++;
-            Debug.Log(currentWaveIndex);
-            Debug.Log("웨이브 인덱스와 길이");
-            Debug.Log(waves.Length);
             // EnemySpawner의 Startwave() 함수 호출, 현재 웨이브 정보 제공
             enemySpawner.StartWave(waves[currentWaveIndex]);
-        }
-        else
-        {
-            Debug.Log("아직 다음단계 실행 못함");
-            Debug.Log(enemySpawner.EnemyList.Count);
         }
     }
 }
 
+// 웨이브 커스텀 시스템
 [System.Serializable]
 public struct Wave
 {
     public float spawnTime;
     public int maxEnemyCount;
     public GameObject[] enemyPrefabs;
+    public int mobHP;
+    public bool isBoss;
+    public string pathString;
+    public int lifePenalty;
+    public float speed;
+    public float armor;
+
 }

@@ -16,15 +16,15 @@ MonoBehaviour:
     type: 3}
   weapon:
   - Prefab: {fileID: 350395162714193125, guid: 96dd8950b2a561c4b9f0844cce5709ef, type: 3}
-    Damage: 1.5
+    Damage: 5
     rate: 2
     range: 100
     cost: 0
     isParticle: 0
-    spawnPoint: GunHead
-    effect: {fileID: 0}
+    isDeBuff: 0
+    isZangPan: 0
     missile: {fileID: 6709678017008513555, guid: c6520d8e9971b144fab4e035e217eea1,
       type: 3}
-    missileUp: 20
+    missileUp: 50
     missileWaitSecond: 1
     missileSpeed: 50

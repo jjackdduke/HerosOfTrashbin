@@ -17,13 +17,13 @@ MonoBehaviour:
   weapon:
   - Prefab: {fileID: 5994176029770567409, guid: c14b303ed1f0e284b8d5b7faddb6dbb1,
       type: 3}
-    Damage: 5
+    Damage: 10
     rate: 6.5
     range: 70
     cost: 10
     isParticle: 0
-    spawnPoint: Lava
-    effect: {fileID: 0}
+    isDeBuff: 0
+    isZangPan: 0
     missile: {fileID: 7641722786224840907, guid: 14c5da2a9c8b2c940beed8569ca4f1b0,
       type: 3}
     missileUp: 20
@@ -31,13 +31,13 @@ MonoBehaviour:
     missileSpeed: 50
   - Prefab: {fileID: 1286383218548459431, guid: d2c6ac91eecbe90429d54bfce74aee79,
       type: 3}
-    Damage: 5
+    Damage: 15
     rate: 8
     range: 70
     cost: 20
     isParticle: 0
-    spawnPoint: Lava
-    effect: {fileID: 0}
+    isDeBuff: 0
+    isZangPan: 0
     missile: {fileID: 7641722786224840907, guid: 14c5da2a9c8b2c940beed8569ca4f1b0,
       type: 3}
     missileUp: 20
@@ -45,13 +45,13 @@ MonoBehaviour:
     missileSpeed: 50
   - Prefab: {fileID: 6017897722388203714, guid: a6c772b3a2d8df4409c4b9ebbddd2566,
       type: 3}
-    Damage: 8
+    Damage: 20
     rate: 8
     range: 80
     cost: 30
     isParticle: 0
-    spawnPoint: Lava
-    effect: {fileID: 0}
+    isDeBuff: 0
+    isZangPan: 0
     missile: {fileID: 7641722786224840907, guid: 14c5da2a9c8b2c940beed8569ca4f1b0,
       type: 3}
     missileUp: 20

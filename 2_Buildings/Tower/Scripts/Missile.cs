@@ -6,29 +6,31 @@ using static UnityEngine.GraphicsBuffer;
 public class Missile : MonoBehaviour
 {
     Rigidbody rigidBody = null;
-    [SerializeField] private Transform target = null;
-    private float Damage;
+    [SerializeField] private Transform thisTarget = null;
+    float thisDamage;
 
-    [SerializeField]  private float missileSpeed = 0f;
+    [SerializeField]  private float thisMissileSpeed = 0f;
     float currentSpeed = 0f;
-    private float missileWaitSecond = 0f;
-    [SerializeField] ParticleSystem Effect = null;
+    float thisMissileWaitSecond = 0f;
+    [SerializeField] ParticleSystem thisEffect = null;
 
     TargetLocator missileTurret;
-    private bool fire = false;
+    bool fire = false;
+    bool thisDeBuff = false;
 
-    public void SetUp(Transform attackTarget, float damage, float missileSpeed, float missileWaitSecond)
+    public void SetUp(Transform attackTarget, float damage, float missileSpeed, float missileWaitSecond, bool deBuff)
     {
-        this.target = attackTarget;
-        this.Damage = damage;
-        this.missileSpeed = missileSpeed;
-        this.missileWaitSecond = missileWaitSecond;
+        this.thisTarget = attackTarget;
+        this.thisDamage = damage;
+        this.thisMissileSpeed = missileSpeed;
+        this.thisMissileWaitSecond = missileWaitSecond;
+        this.thisDeBuff = deBuff;
     }
 
     IEnumerator LaunchDelay()
     {
         yield return new WaitUntil(() => rigidBody.velocity.y < 0f);
-        yield return new WaitForSeconds(missileWaitSecond);
+        yield return new WaitForSeconds(thisMissileWaitSecond);
         fire = Aimweapon();
 
         yield return new WaitForSeconds(3f);
@@ -39,20 +41,23 @@ public class Missile : MonoBehaviour
     void Start()
     {
         rigidBody = GetComponent<Rigidbody>();
-        Effect.Play();
+        if (thisEffect != null)
+        {
+            thisEffect.Play();
+        }
         StartCoroutine(LaunchDelay());
     }
 
     void Update()
     {
-        if (target)
+        if (thisTarget)
         {
-            if (currentSpeed <= missileSpeed)
-                currentSpeed += missileSpeed * Time.deltaTime;
+            if (currentSpeed <= thisMissileSpeed)
+                currentSpeed += thisMissileSpeed * Time.deltaTime;
 
             transform.position += transform.up * currentSpeed * Time.deltaTime;
 
-            Vector3 t_dir = (target.position - transform.position).normalized;
+            Vector3 t_dir = (thisTarget.position - transform.position).normalized;
             transform.up = Vector3.Lerp(transform.up, t_dir, 0.25f);
 
         }
@@ -72,17 +77,17 @@ public class Missile : MonoBehaviour
                     maxDistance = targetDistance;
                 }
             }
-            target = closestTarget;
+            thisTarget = closestTarget;
         }
 
     }
 
     bool Aimweapon()
     {
-        if (target)
+        if (thisTarget)
         {
             
-            float targetDistance = Vector3.Distance(transform.position, target.position);
+            float targetDistance = Vector3.Distance(transform.position, thisTarget.position);
 
             missileTurret = FindObjectOfType<TargetLocator>();
             if (targetDistance < missileTurret.attackRange)
@@ -100,8 +105,15 @@ public class Missile : MonoBehaviour
         if (collision.gameObject.tag == "Enemy")
         {
             Destroy(gameObject);
-            EnemyHP enemyHp = collision.gameObject.GetComponent<EnemyHP>();
-            enemyHp.ProcessHit(Damage);
+            Enemy enemy = collision.gameObject.GetComponent<Enemy>();
+            if (thisDeBuff)
+            {
+                enemy.ProcessReduceSpeed(thisDamage);
+            }   
+            else
+            {
+                enemy.ProcessHit(thisDamage);
+            }
         }
     }
 

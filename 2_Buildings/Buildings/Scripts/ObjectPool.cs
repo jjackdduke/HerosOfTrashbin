@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using UnityEngine;
 using Random = System.Random;
 
@@ -50,11 +51,14 @@ public class ObjectPool : MonoBehaviour
     {
         for (int i = 0; i < pool.Length; i++)
         {
-            if (pool[i].activeInHierarchy == false)
+            if (pool[i] != null)
             {
-                pool[i].SetActive(true);
-                pool[i].transform.position = transform.position; 
-                return;
+                if (pool[i].activeInHierarchy == false)
+                {
+                    pool[i].SetActive(true);
+                    pool[i].transform.position = transform.position;
+                    return;
+                }
             }
         }
     }

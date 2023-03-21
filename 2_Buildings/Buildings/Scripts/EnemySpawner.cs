@@ -6,6 +6,9 @@ public class EnemySpawner : MonoBehaviour
 {
     // 적 프리펩
     [SerializeField] private GameObject enemyPrefab;
+
+    // 임의 시작용 wavesystem
+    [SerializeField] private GameObject startt;
     
     // 적 체력을 나타내는 UI프리펩
     // [SerializeField] private GameObject enemyHPSliderPrefab;
@@ -44,25 +47,38 @@ public class EnemySpawner : MonoBehaviour
         while (spawnEnemyCount < currentWave.maxEnemyCount)
         {   
            // 몹 바꾸려면 여기서 바꿔주면 됨
-            GameObject clone = Instantiate(enemyPrefab, transform);
+            GameObject clone = Instantiate(currentWave.enemyPrefabs[0], transform);
             Enemy enemy = clone.GetComponent<Enemy>();
+            //enemy.pathString = currentWave.pathString;
+            enemy.mobHP = currentWave.mobHP;
+            enemy.isBoss = currentWave.isBoss;
+            enemy.lifePenalty = currentWave.lifePenalty;
+            enemy.speed = currentWave.speed;
+            enemy.armor = currentWave.armor;
 
             enemyList.Add(enemy);
             spawnEnemyCount++;
 
             yield return new WaitForSeconds(currentWave.spawnTime);
         }
-        Debug.Log("웨이브 소환 완료");
         // 임시방편으로 이렇게 해놈
-        enemyList = new List<Enemy>();
+        // enemyList = new List<Enemy>();
     }
 
     public void DestroyEnemy(Enemy enemy)
     {
-        Debug.Log("적 삭제!!!!");
         // 리스트에서 사망하는 적 정보 삭제
         enemyList.Remove(enemy);
         // 적 오브젝트 삭제
         Destroy(enemy.gameObject);
+    }
+
+    // 스타트 버튼 없을때만 쓰는거
+    private void Update()
+    {
+        if (enemyList.Count == 0)
+        {
+            startt.GetComponent<WaveSystem>().StartWave();
+        }
     }
 }

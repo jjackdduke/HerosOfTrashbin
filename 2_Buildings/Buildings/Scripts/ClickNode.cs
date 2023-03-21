@@ -21,6 +21,7 @@ public class ClickNode : MonoBehaviour
     [SerializeField] TowerTemplate FirePrefab;
     [SerializeField] TowerTemplate IcePrefab;
     [SerializeField] TowerTemplate GunPrefab;
+    [SerializeField] TowerTemplate SlowPrefab;
 
     // �������� ����
     public Renderer rend;
@@ -49,29 +50,34 @@ public class ClickNode : MonoBehaviour
         {
             bool isSuccessful;
             
-            randomValue = randomObj.Next(7, 8);
+            randomValue = randomObj.Next(2, 6);
             //Debug.Log(randomValue);
             rend.material.color = SelectColor;
             // Ÿ���� ��ġ�Ǿ� ���� ���� ��ġ��� Ÿ�������տ� ����� ��ũ��Ʈ������ Ÿ�� ��ġ �޼ҵ� ����
-            if (randomValue > 6)
+            if (randomValue >= 5)
+            {
+                isSuccessful = CreateTower(SlowPrefab, transform.position);
+                isBuilt = 5;
+            }
+            else if (randomValue == 4)
             {
                 isSuccessful = CreateTower(GunPrefab, transform.position); 
-                isBuilt = 1;
+                isBuilt = 4;
             }
-            else if (randomValue > 4 && randomValue <= 6)
+            else if (randomValue == 3)
             {
                 isSuccessful = CreateTower(TurretPrefab, transform.position);
-                isBuilt = 2;
+                isBuilt = 3;
             }
-            else if (randomValue > 2 && randomValue <= 4)
+            else if (randomValue == 2)
             {
                 isSuccessful = CreateTower(FirePrefab, transform.position);
-                isBuilt = 3;
+                isBuilt = 2;
             }
             else
             {
                 isSuccessful = CreateTower(IcePrefab, transform.position);
-                isBuilt = 4;
+                isBuilt = 1;
             }
 
         }
@@ -92,7 +98,7 @@ public class ClickNode : MonoBehaviour
             //StartCoroutine(Build());
             // cost += inflation;
 
-            towerClone.GetComponent<TowerWeapon>().SetUp(towerTemplate, true);
+            towerClone.GetComponent<TowerWeapon>().SetUp(towerTemplate);
             
 
             gameObject.SetActive(false);

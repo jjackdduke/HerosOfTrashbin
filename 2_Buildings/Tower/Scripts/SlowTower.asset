@@ -10,37 +10,44 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c47b0de284fc0d54d80fb878ffeca7cc, type: 3}
-  m_Name: GunTower
+  m_Name: SlowTower
   m_EditorClassIdentifier: 
-  towerPrefab: {fileID: 1000010153274142, guid: 2652172d138981b4abc806ea8ec36564,
+  towerPrefab: {fileID: 8729720902896533289, guid: f8dc40e1b05bf844a823629052b52beb,
     type: 3}
   weapon:
-  - Prefab: {fileID: 1000013566905100, guid: b5ceca2fab4f06f49aa235f4f428275a, type: 3}
-    Damage: 1.1
-    rate: 0.3
-    range: 60
-    cost: 0
-    isParticle: 1
+  - Prefab: {fileID: 8729720902896533289, guid: f8dc40e1b05bf844a823629052b52beb,
+      type: 3}
+    Damage: 0.2
+    rate: 0
+    range: 30
+    cost: 15
+    isParticle: 0
+    isDeBuff: 1
+    isZangPan: 1
     missile: {fileID: 0}
     missileUp: 0
     missileWaitSecond: 0
     missileSpeed: 0
-  - Prefab: {fileID: 1000013227101710, guid: d9231829d3cedca409477c9327eb6425, type: 3}
-    Damage: 1.2
-    rate: 0.2
-    range: 60
-    cost: 10
-    isParticle: 1
+  - Prefab: {fileID: 0}
+    Damage: 0.4
+    rate: 0
+    range: 40
+    cost: 25
+    isParticle: 0
+    isDeBuff: 1
+    isZangPan: 1
     missile: {fileID: 0}
     missileUp: 0
     missileWaitSecond: 0
     missileSpeed: 0
-  - Prefab: {fileID: 1000012105359850, guid: 16e71322676cb6840a252ad4f7fc2d26, type: 3}
-    Damage: 1.3
-    rate: 0.1
-    range: 70
-    cost: 20
-    isParticle: 1
+  - Prefab: {fileID: 0}
+    Damage: 0.6
+    rate: 0
+    range: 50
+    cost: 35
+    isParticle: 0
+    isDeBuff: 1
+    isZangPan: 1
     missile: {fileID: 0}
     missileUp: 0
     missileWaitSecond: 0
