@@ -7,17 +7,17 @@ using TMPro;
 public class Slot : MonoBehaviour
 {
 
-    public Item item; // È¹µæÇÑ ¾ÆÀÌÅÛ
-    public int itemCount; // È¹µæÇÑ ¾ÆÀÌÅÛ °³¼ö
-    public Image itemImage; // ¾ÆÀÌÅÛÀÇ ÀÌ¹ÌÁö
+    public Item item; // È¹ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    public int itemCount; // È¹ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public Image itemImage; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¹ï¿½ï¿½ï¿½
 
-    // ÇÊ¿äÇÑ ÄÄÆ÷³ÍÆ®
+    // ï¿½Ê¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
     [SerializeField]
     private TextMeshProUGUI text_Count;
     [SerializeField]
     private GameObject go_CountImage;
 
-    // ÀÌ¹ÌÁöÀÇ Åõ¸íµµ Á¶Àý
+    // ï¿½Ì¹ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     private void SetColor(float _alpha)
     {
         Color color = itemImage.color;
@@ -26,7 +26,7 @@ public class Slot : MonoBehaviour
 
     }
 
-    //¾ÆÀÌÅÛ È¹µæ
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È¹ï¿½ï¿½
     public void AddItem(Item _item, int _count = 1)
     {
         item = _item;
@@ -45,11 +45,11 @@ public class Slot : MonoBehaviour
         }
         
 
-        // ¾ÆÀÌÅÛÀÌ µé¾î°¡¼­ ÀÎº¥Ã¢¿¡ º¸¿©ÁØ´Ù
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½î°¡ï¿½ï¿½ ï¿½Îºï¿½Ã¢ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø´ï¿½
         SetColor(1);
     }
 
-    // ¾ÆÀÌÅÛ °³¼ö Á¶Àý
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     public void SetSlotCount(int _count)
     {
         itemCount += _count;
@@ -61,7 +61,7 @@ public class Slot : MonoBehaviour
         }
     }
 
-    // ½½·Ô ÃÊ±âÈ­
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
     private void ClearSlot()
     {
         item = null;

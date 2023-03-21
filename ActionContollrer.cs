@@ -37,7 +37,7 @@ public class ActionContollrer : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Z))
         {
-            CheckItem();
+            //CheckItem();
             CanPickUp();
         }
     }
@@ -59,10 +59,22 @@ public class ActionContollrer : MonoBehaviour
 
     private void CheckItem()
     {
+        Debug.DrawRay(transform.position, transform.forward * 20, Color.red);
+
+        
         if(Physics.Raycast(transform.position,transform.TransformDirection(Vector3.forward),out hitInfo,range,
             layerMask))
         {
-            if(hitInfo.transform.tag == "Item")
+
+            if (hitInfo.collider.name != null)
+            {
+                Debug.Log(hitInfo.collider.tag);
+            }
+            //if(hitInfo.transform.tag == "Item")
+            //{
+            //    ItemInfoAppear();
+            //}
+            if (hitInfo.collider.tag == "Item")
             {
                 ItemInfoAppear();
             }
