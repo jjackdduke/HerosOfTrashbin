@@ -16,7 +16,7 @@ public class TEST2 : MonoBehaviour
 
     void Update()
     {
-        transform.position = Mob.position;
+        transform.position = Mob.position + new Vector3(0, Mob.GetChild(0).localScale.y - 7, 0);
         transform.rotation = Quaternion.Euler(90f, 0, 0);
     }
 }

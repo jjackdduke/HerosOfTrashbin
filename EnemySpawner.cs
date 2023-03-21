@@ -47,11 +47,12 @@ public class EnemySpawner : MonoBehaviour
         while (spawnEnemyCount < currentWave.maxEnemyCount)
         {   
            // ¸÷ ¹Ù²Ù·Á¸é ¿©±â¼­ ¹Ù²ãÁÖ¸é µÊ
-            GameObject clone = Instantiate(enemyPrefab, transform);
+            GameObject clone = Instantiate(currentWave.enemyPrefabs[0], transform);
             Enemy enemy = clone.GetComponent<Enemy>();
             enemy.pathString = currentWave.pathString;
             enemy.mobHP = currentWave.mobHP;
             enemy.isBoss = currentWave.isBoss;
+            if (enemy.isBoss) { enemy.transform.GetChild(0).transform.localScale *= 2f; }
             enemy.lifePenalty = currentWave.lifePenalty;
             enemy.speed = currentWave.speed;
             enemy.armor = currentWave.armor;

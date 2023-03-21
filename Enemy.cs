@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class Enemy : MonoBehaviour
 {
@@ -33,6 +34,7 @@ public class Enemy : MonoBehaviour
     public int lifePenalty;
     // 몬스터 속도
     public float speed;
+    bool deBuffed;
 
     private EnemySpawner enemySpawner;
 
@@ -42,8 +44,10 @@ public class Enemy : MonoBehaviour
     public bool isBoss;
 
     private float currentHP;
+    private float currentSpeed;
 
     [SerializeField] GameObject greenHP;
+    [SerializeField] GameObject damageText;
 
 
 
@@ -56,6 +60,7 @@ public class Enemy : MonoBehaviour
         //anim = GetComponentInChildren<Animator>();
 
         currentHP = mobHP;
+        currentSpeed = speed;
     }
 
     // Update is called once per frame
@@ -81,7 +86,7 @@ public class Enemy : MonoBehaviour
         //anim.SetBool("isRun", dir != Vector3.zero);
 
         
-        float distThisFrame = speed * Time.deltaTime;
+        float distThisFrame = currentSpeed * Time.deltaTime;
         if(dir.magnitude <= distThisFrame)
         {
             // 노드에 도착
@@ -162,17 +167,20 @@ public class Enemy : MonoBehaviour
     void OnCollisionEnter(Collision collision)
     {
         // Debug.Log(collision.gameObject.name);
-        ProcessHit(1);
+        // ProcessHit(1);
 
     }
     public void ProcessHit(float Damage)
     {
         // 체력 감소
-        // currentHP -= Damage;
+        currentHP -= Damage;
+        damageText.GetComponent<TMP_Text>().text = Damage.ToString();
+        GameObject Hit = Instantiate(damageText, transform.position, Quaternion.identity, this.GetComponentInChildren<Canvas>().transform);
+        Hit.transform.position += new Vector3(0, this.transform.GetChild(1).childCount / 2, 0);
+        Destroy(Hit, 0.6f);
 
         // 테스트용 체력감소
-        Debug.Log("체력 감소!");
-        currentHP -= 1;
+        // currentHP -= 1;
 
 
         if (currentHP <= 0)
@@ -180,5 +188,22 @@ public class Enemy : MonoBehaviour
             Death();
 
         }
+    }
+
+    public void ProcessReduceSpeed(float reduce)
+    {
+        if (!deBuffed && currentSpeed == speed)
+        {
+            Debug.Log("이속 감소!");
+            currentSpeed = speed * (1 - reduce);
+            deBuffed = true;
+            StartCoroutine(isDeBuffed());
+        }
+    }
+    IEnumerator isDeBuffed()
+    {
+        yield return new WaitForSeconds(1f);
+        deBuffed = false;
+        currentSpeed = speed;
     }
 }
