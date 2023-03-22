@@ -71,7 +71,7 @@ public class EnemySpawner : MonoBehaviour
         // 리스트에서 사망하는 적 정보 삭제
         enemyList.Remove(enemy);
         // 적 오브젝트 삭제
-        Destroy(enemy.gameObject);
+        Destroy(enemy.gameObject, 0.8f);
     }
 
     // 스타트 버튼 없을때만 쓰는거

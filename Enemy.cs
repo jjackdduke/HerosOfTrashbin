@@ -1,5 +1,3 @@
-
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,13 +17,13 @@ public class Enemy : MonoBehaviour
     public int PathNodeIdx { get { return pathNodeIdx; } }
 
     //애니메이션 부여
-    //Animator anim;
-
+    Animator anim;
+    
     // 몬스터 잡았을 시 상금
     //[SerializeField] int goldReward = 2;
 
     
-    public Bank bank;
+    public GM gm;
     // wavesystem 참조로 변경중...
 
     // 경로 입력
@@ -44,11 +42,12 @@ public class Enemy : MonoBehaviour
     public bool isBoss;
 
     private float currentHP;
+    public float CurrentHP { get { return currentHP; } }
     private float currentSpeed;
 
     [SerializeField] GameObject greenHP;
     [SerializeField] GameObject damageText;
-
+    [SerializeField] GameObject hpbar;
 
 
     void Start()
@@ -56,11 +55,12 @@ public class Enemy : MonoBehaviour
         // 게임오브젝트로 선언된 pathGO에 하이어라키의 path들을 갖고 있는 Paths 오브젝트 할당
         pathGO = GameObject.Find(pathString);
         // Bank 오브젝트를 하이어라키에서 찾아 bank에 할당
-        bank = FindObjectOfType<Bank>();
+        gm = FindObjectOfType<GM>();
         //anim = GetComponentInChildren<Animator>();
 
         currentHP = mobHP;
         currentSpeed = speed;
+        anim = this.transform.GetChild(0).GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -135,11 +135,11 @@ public class Enemy : MonoBehaviour
     public void LooseLife()
     {
         // Bank의 생명력 감소 메소드 호출
-        if (bank == null)
+        if (gm == null)
         {
             return;
         }
-        bank.LooseLife(lifePenalty);
+        gm.LooseLife(lifePenalty);
     }
 
     public void Death()
@@ -167,16 +167,29 @@ public class Enemy : MonoBehaviour
     void OnCollisionEnter(Collision collision)
     {
         // Debug.Log(collision.gameObject.name);
-        // ProcessHit(1);
+        //ProcessHit(1);
 
     }
+
     public void ProcessHit(float Damage)
     {
         // 체력 감소
-        currentHP -= Damage;
-        damageText.GetComponent<TMP_Text>().text = Damage.ToString();
+        if (Damage > armor)
+        {
+            Damage -= armor;
+            currentHP -= Damage;
+            damageText.GetComponent<TMP_Text>().text = Damage.ToString();
+            if (currentHP > 0)
+            {
+                anim.SetTrigger("Hit");
+            }
+        }
+        else
+        {
+            damageText.GetComponent<TMP_Text>().text = "Blocked!";
+        }
+
         GameObject Hit = Instantiate(damageText, transform.position, Quaternion.identity, this.GetComponentInChildren<Canvas>().transform);
-        Hit.transform.position += new Vector3(0, this.transform.GetChild(1).childCount / 2, 0);
         Destroy(Hit, 0.6f);
 
         // 테스트용 체력감소
@@ -185,8 +198,22 @@ public class Enemy : MonoBehaviour
 
         if (currentHP <= 0)
         {
+            currentSpeed = 0;
+            Destroy(hpbar);
+            anim.SetBool("isDeath", true);
             Death();
 
+        }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if(other.tag == "Weapon")
+        {
+  
+            Weapon weapon = other.GetComponent<Weapon>();
+            float weaponDamage = weapon.damage;
+            ProcessHit(weaponDamage);
         }
     }
 
