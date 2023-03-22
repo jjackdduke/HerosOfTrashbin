@@ -25,6 +25,6 @@ MonoBehaviour:
     isZangPan: 0
     missile: {fileID: 6709678017008513555, guid: c6520d8e9971b144fab4e035e217eea1,
       type: 3}
-    missileUp: 50
+    missileUp: 25
     missileWaitSecond: 1
     missileSpeed: 50

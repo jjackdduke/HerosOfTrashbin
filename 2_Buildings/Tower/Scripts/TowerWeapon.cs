@@ -10,7 +10,7 @@ using static UnityEngine.GraphicsBuffer;
 
 public class TowerWeapon : MonoBehaviour
 {
-    Bank bank;
+    GM gm;
     int level = 1;
     int childCnt;
 
@@ -97,16 +97,16 @@ public class TowerWeapon : MonoBehaviour
 
     private bool Upgrade()
     {
-        bank = FindObjectOfType<Bank>();
-        Debug.Log(level);
-        Debug.Log(childCnt);
-        Debug.Log(thisTowerTemplate.weapon[level].cost);
-        if (level < childCnt && bank.CurrentBalance >= thisTowerTemplate.weapon[level].cost)
+        gm = FindObjectOfType<GM>();
+        //Debug.Log(level);
+        //Debug.Log(childCnt);
+        //Debug.Log(thisTowerTemplate.weapon[level].cost);
+        if (level < childCnt && gm.Gold >= thisTowerTemplate.weapon[level].cost)
         {
             transform.GetChild(level).gameObject.SetActive(false);
             level++;
             transform.GetChild(level).gameObject.SetActive(true);
-            bank.Withdraw(thisTowerTemplate.weapon[level - 1].cost);
+            gm.Withdraw(thisTowerTemplate.weapon[level - 1].cost);
             SpecialTower();
             return true;
         }
@@ -141,8 +141,8 @@ public class TowerWeapon : MonoBehaviour
             foreach (Enemy enemy in enemies)
             {
                 float targetDistance = Vector3.Distance(transform.position, enemy.transform.position);
-
-                if (targetDistance < maxDistance)
+                float enemyHP = enemy.GetComponent<Enemy>().CurrentHP;
+                if (targetDistance < maxDistance && enemyHP > 0)
                 {
                     closestTarget = enemy.transform;
                     maxDistance = targetDistance;

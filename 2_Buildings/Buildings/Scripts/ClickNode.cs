@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Bson;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -30,17 +31,18 @@ public class ClickNode : MonoBehaviour
     Random randomObj = new Random();
     int randomValue;
 
-    Bank bank;
+    GM gm;
 
     // �Ǽ�������
-    private float buildDelay = 0.5f;
-
+    private float buildDelay = 0.3f;
+    GameObject arrow;
 
     void Awake()
     {
-        bank = FindObjectOfType<Bank>();
+        gm = FindObjectOfType<GM>();
         rend = GetComponent<Renderer>();
         rend.material.color = StartColor;
+        arrow = transform.GetChild(2).gameObject;
     }
 
 
@@ -87,21 +89,20 @@ public class ClickNode : MonoBehaviour
     {
         GameObject projectilePrefab = towerTemplate.weapon[0].Prefab;
 
-        if (bank == null)
+        if (gm == null)
         {
             return false;
         }
-        if (bank.TowerTO > 0)
+        if (gm.TowerCnt > 0)
             {
             GameObject towerClone = Instantiate(projectilePrefab, position, Quaternion.identity);
-            //bank.BuildTower();
-            //StartCoroutine(Build());
+            gm.BuildTower();
+            StartCoroutine(Build());
             // cost += inflation;
 
             towerClone.GetComponent<TowerWeapon>().SetUp(towerTemplate);
-            
-
             gameObject.SetActive(false);
+
             return true;
         }
         
@@ -130,5 +131,10 @@ public class ClickNode : MonoBehaviour
             }
         }
 
+    }
+
+    public void Arrow(bool show)
+    {
+        arrow.SetActive(show);
     }
 }

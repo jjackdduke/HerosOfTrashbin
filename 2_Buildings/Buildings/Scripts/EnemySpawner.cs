@@ -49,9 +49,10 @@ public class EnemySpawner : MonoBehaviour
            // 몹 바꾸려면 여기서 바꿔주면 됨
             GameObject clone = Instantiate(currentWave.enemyPrefabs[0], transform);
             Enemy enemy = clone.GetComponent<Enemy>();
-            //enemy.pathString = currentWave.pathString;
+            enemy.pathString = currentWave.pathString;
             enemy.mobHP = currentWave.mobHP;
             enemy.isBoss = currentWave.isBoss;
+            if (enemy.isBoss) { enemy.transform.GetChild(0).transform.localScale *= 2f; }
             enemy.lifePenalty = currentWave.lifePenalty;
             enemy.speed = currentWave.speed;
             enemy.armor = currentWave.armor;
@@ -70,7 +71,7 @@ public class EnemySpawner : MonoBehaviour
         // 리스트에서 사망하는 적 정보 삭제
         enemyList.Remove(enemy);
         // 적 오브젝트 삭제
-        Destroy(enemy.gameObject);
+        Destroy(enemy.gameObject, 0.8f);
     }
 
     // 스타트 버튼 없을때만 쓰는거
