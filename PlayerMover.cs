@@ -23,7 +23,7 @@ public class PlayerMover : MonoBehaviour
     GameObject nearObject;
     bool iDown;
     bool fDown;
-    bool isFireReady = true;
+    //bool isFireReady = true;
     bool isSkillReady = true;
     bool skillDown;
     bool isBorder;

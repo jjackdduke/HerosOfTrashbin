@@ -11,7 +11,7 @@ public class ActionContollrer : MonoBehaviour
 
     private bool pickupActivated = false; // 습득 가능할 시 true
 
-    private RaycastHit hitInfo; // 충돌체 정보 저장
+    //private RaycastHit hitInfo; // 충돌체 정보 저장
 
     [SerializeField]
     private LayerMask layerMask; // 아이템 레이어에만 반응해야 한다.
@@ -29,67 +29,56 @@ public class ActionContollrer : MonoBehaviour
 
     void Update()
     {
-        CheckItem();
-        TryAction();
+
     }
 
-    private void TryAction()
-    {
-        if (Input.GetKeyDown(KeyCode.Z))
-        {
-            //CheckItem();
-            CanPickUp();
-        }
-    }
+    
 
-    private void CanPickUp()
+    private void CanPickUp(Collider other)
     {
         if (pickupActivated)
         {
-            if(hitInfo.transform != null)
+            if (other.transform != null)
             {
-                Debug.Log(hitInfo.transform.GetComponent<ItemPickUp>()
+                Debug.Log(other.transform.GetComponent<ItemPickUp>()
             .item.itemName + "획득했습니다.");
-                theInventory.AcquireItem(hitInfo.transform.GetComponent<ItemPickUp>().item);
-                Destroy(hitInfo.transform.gameObject);
+                theInventory.AcquireItem(other.transform.GetComponent<ItemPickUp>().item);
+                Destroy(other.transform.gameObject);
                 InfoDisappear();
             }
         }
     }
 
-    private void CheckItem()
+    
+
+    void OnTriggerStay(Collider other)
     {
-        Debug.DrawRay(transform.position, transform.forward * 20, Color.red);
+        if(other.gameObject.tag == "Item")
+        {   
+            ItemInfoAppear(other);
 
-        
-        if(Physics.Raycast(transform.position,transform.TransformDirection(Vector3.forward),out hitInfo,range,
-            layerMask))
-        {
+            if (Input.GetKey(KeyCode.Z))
+            {
+                CanPickUp(other);
+            }
 
-            if (hitInfo.collider.name != null)
-            {
-                Debug.Log(hitInfo.collider.tag);
-            }
-            //if(hitInfo.transform.tag == "Item")
-            //{
-            //    ItemInfoAppear();
-            //}
-            if (hitInfo.collider.tag == "Item")
-            {
-                ItemInfoAppear();
-            }
         }
-        else
+        
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.tag == "Item")
         {
             InfoDisappear();
         }
     }
 
-    private void ItemInfoAppear()
+    private void ItemInfoAppear(Collider other)
     {
         pickupActivated = true;
         actionText.gameObject.SetActive(true);
-        actionText.text = hitInfo.transform.GetComponent<ItemPickUp>()
+        actionText.text = other.transform.GetComponent<ItemPickUp>()
             .item.itemName + "획득 " + "<color=yellow>" + "(Z)" + "</color>";
     }
 
