@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Bson;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ public class ClickNode : MonoBehaviour
     [SerializeField] TowerTemplate FirePrefab;
     [SerializeField] TowerTemplate IcePrefab;
     [SerializeField] TowerTemplate GunPrefab;
-    [SerializeField] TowerTemplate SlowPrefab;
+    [SerializeField] TowerTemplate CursePrefab;
 
 
     [SerializeField]
@@ -38,11 +39,10 @@ public class ClickNode : MonoBehaviour
     GM gm;
 
     // �Ǽ�������
-    private float buildDelay = 0.5f;
+    private float buildDelay = 0.3f;
     GameObject arrow;
 
     bool buildActivated;
-
 
     void Awake()
     {
@@ -52,45 +52,6 @@ public class ClickNode : MonoBehaviour
         arrow = transform.GetChild(2).gameObject;
     }
 
-
-    private void OnMouseUp()
-    {
-        if (isBuilt == 0)
-        {
-            bool isSuccessful;
-            
-            randomValue = randomObj.Next(2, 6);
-            //Debug.Log(randomValue);
-            rend.material.color = SelectColor;
-            // Ÿ���� ��ġ�Ǿ� ���� ���� ��ġ��� Ÿ�������տ� ����� ��ũ��Ʈ������ Ÿ�� ��ġ �޼ҵ� ����
-            if (randomValue >= 5)
-            {
-                isSuccessful = CreateTower2(SlowPrefab, transform.position);
-                isBuilt = 5;
-            }
-            else if (randomValue == 4)
-            {
-                isSuccessful = CreateTower2(GunPrefab, transform.position); 
-                isBuilt = 4;
-            }
-            else if (randomValue == 3)
-            {
-                isSuccessful = CreateTower2(TurretPrefab, transform.position);
-                isBuilt = 3;
-            }
-            else if (randomValue == 2)
-            {
-                isSuccessful = CreateTower2(FirePrefab, transform.position);
-                isBuilt = 2;
-            }
-            else
-            {
-                isSuccessful = CreateTower2(IcePrefab, transform.position);
-                isBuilt = 1;
-            }
-
-        }
-    }
 
     private void OnTriggerStay(Collider other)
     {
@@ -121,45 +82,19 @@ public class ClickNode : MonoBehaviour
         {
             return false;
         }
-        if (gm.TowerTO > 0)
+        if (gm.TowerCnt > 0)
             {
             GameObject towerClone = Instantiate(projectilePrefab, position, Quaternion.identity);
-            //bank.BuildTower();
-            //StartCoroutine(Build());
+            gm.BuildTower();
+            StartCoroutine(Build());
             // cost += inflation;
 
             towerClone.GetComponent<TowerWeapon>().SetUp(towerTemplate, actionText);
-            
-
             gameObject.SetActive(false);
+
             return true;
         }
         
-        return false;
-    }
-
-    public bool CreateTower2(TowerTemplate towerTemplate, Vector3 position)
-    {
-        GameObject projectilePrefab = towerTemplate.weapon[0].Prefab;
-
-        if (gm == null)
-        {
-            return false;
-        }
-        if (gm.TowerTO > 0)
-        {
-            GameObject towerClone = Instantiate(projectilePrefab, position, Quaternion.identity);
-            //bank.BuildTower();
-            //StartCoroutine(Build());
-            // cost += inflation;
-
-            towerClone.GetComponent<TowerWeapon>().SetUp2(towerTemplate);
-
-
-            gameObject.SetActive(false);
-            return true;
-        }
-
         return false;
     }
 
@@ -193,19 +128,18 @@ public class ClickNode : MonoBehaviour
         if (isBuilt == 0 && buildActivated)
         {
             bool isSuccessful;
-
-            randomValue = randomObj.Next(2, 6);
+            
+            randomValue = randomObj.Next(1, 6);
             //Debug.Log(randomValue);
             rend.material.color = SelectColor;
-            // Ÿ���� ��ġ�Ǿ� ���� ���� ��ġ��� Ÿ�������տ� ����� ��ũ��Ʈ������ Ÿ�� ��ġ �޼ҵ� ����
             if (randomValue >= 5)
             {
-                isSuccessful = CreateTower(SlowPrefab, transform.position);
+                isSuccessful = CreateTower(CursePrefab, transform.position);
                 isBuilt = 5;
             }
             else if (randomValue == 4)
             {
-                isSuccessful = CreateTower(GunPrefab, transform.position);
+                isSuccessful = CreateTower(GunPrefab, transform.position); 
                 isBuilt = 4;
             }
             else if (randomValue == 3)
@@ -246,5 +180,4 @@ public class ClickNode : MonoBehaviour
     {
         arrow.SetActive(show);
     }
-
 }

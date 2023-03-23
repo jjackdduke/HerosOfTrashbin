@@ -3,96 +3,100 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-
-public class Enemy : MonoBehaviour
+using Photon;
+using Photon.Pun;
+using Photon.Realtime;
+public class Enemy : MonoBehaviourPunCallbacks
 {
-    // ¸ó½ºÅÍ °æ·Î ¿ÀºêÁ§Æ® º¯¼ö ¼±¾ğ
+    // ëª¬ìŠ¤í„° ê²½ë¡œ ì˜¤ë¸Œì íŠ¸ ë³€ìˆ˜ ì„ ì–¸
     GameObject pathGO;
 
-    // ¸ó½ºÅÍ°¡ ÀÌµ¿ÇÒ ¿ÀºêÁ§Æ® º¯¼ö ¼±¾ğ
+    // ëª¬ìŠ¤í„°ê°€ ì´ë™í•  ì˜¤ë¸Œì íŠ¸ ë³€ìˆ˜ ì„ ì–¸
     Transform targetPathNode;
 
-    // ¸ó½ºÅÍ°¡ ÇöÀç µû¶ó°¥ path ¿ÀºêÁ§Æ® ¼ø¼­
+    // ëª¬ìŠ¤í„°ê°€ í˜„ì¬ ë”°ë¼ê°ˆ path ì˜¤ë¸Œì íŠ¸ ìˆœì„œ
     int pathNodeIdx = 0;
     public int PathNodeIdx { get { return pathNodeIdx; } }
     
-    //¾Ö´Ï¸ŞÀÌ¼Ç ºÎ¿©
-    //Animator anim;
-
-    // ¸ó½ºÅÍ Àâ¾ÒÀ» ½Ã »ó±İ
+    // ëª¬ìŠ¤í„° ì¡ì•˜ì„ ì‹œ ìƒê¸ˆ
     //[SerializeField] int goldReward = 2;
 
     
-    public GM bank;
-    // wavesystem ÂüÁ¶·Î º¯°æÁß...
+    public GM gm;
 
-    // °æ·Î ÀÔ·Â
+    //ì• ë‹ˆë©”ì´ì…˜ ë¶€ì—¬
+    Animator anim;
+    // wavesystem ì°¸ì¡°ë¡œ ë³€ê²½ì¤‘...
+
+    // ê²½ë¡œ ì…ë ¥
     public string pathString;
-    // ¸ó½ºÅÍ ³õÃÆÀ» ¶§ÀÇ »ı¸í·Â °¨¼Ò
+    // ëª¬ìŠ¤í„° ë†“ì³¤ì„ ë•Œì˜ ìƒëª…ë ¥ ê°ì†Œ
     public int lifePenalty;
-    // ¸ó½ºÅÍ ¼Óµµ
+    // ëª¬ìŠ¤í„° ì†ë„
     public float speed;
     bool deBuffed;
 
     private EnemySpawner enemySpawner;
 
-    // ¸ó½ºÅÍ status
+    // ëª¬ìŠ¤í„° status
     public float mobHP;
     public float armor;
     public bool isBoss;
+    public float CurrentHP { get { return currentHP; } }
 
     private float currentHP;
     private float currentSpeed;
 
     [SerializeField] GameObject greenHP;
+    [SerializeField] GameObject hpbar;
     [SerializeField] GameObject damageText;
-
 
 
     void Start()
     {
-        // °ÔÀÓ¿ÀºêÁ§Æ®·Î ¼±¾ğµÈ pathGO¿¡ ÇÏÀÌ¾î¶óÅ°ÀÇ pathµéÀ» °®°í ÀÖ´Â Paths ¿ÀºêÁ§Æ® ÇÒ´ç
+        // ê²Œì„ì˜¤ë¸Œì íŠ¸ë¡œ ì„ ì–¸ëœ pathGOì— í•˜ì´ì–´ë¼í‚¤ì˜ pathë“¤ì„ ê°–ê³  ìˆëŠ” Paths ì˜¤ë¸Œì íŠ¸ í• ë‹¹
         pathGO = GameObject.Find(pathString);
-        // Bank ¿ÀºêÁ§Æ®¸¦ ÇÏÀÌ¾î¶óÅ°¿¡¼­ Ã£¾Æ bank¿¡ ÇÒ´ç
-        bank = FindObjectOfType<GM>();
+        // Bank ì˜¤ë¸Œì íŠ¸ë¥¼ í•˜ì´ì–´ë¼í‚¤ì—ì„œ ì°¾ì•„ bankì— í• ë‹¹
+        gm = FindObjectOfType<GM>();
         //anim = GetComponentInChildren<Animator>();
 
         currentHP = mobHP;
         currentSpeed = speed;
+        anim = this.transform.GetChild(0).GetComponent<Animator>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        // ÀÌµ¿ÇÒ Å¸°ÙÀÌ ¾øÀ» °æ¿ì
+        // ì´ë™í•  íƒ€ê²Ÿì´ ì—†ì„ ê²½ìš°
         if (targetPathNode == null)
         {
-            // ´ÙÀ½ Å¸°Ù Ã£´Â ¸Ş¼Òµå È£Ãâ
+            // ë‹¤ìŒ íƒ€ê²Ÿ ì°¾ëŠ” ë©”ì†Œë“œ í˜¸ì¶œ
             GetNextPathNode();
             if(targetPathNode == null)
             {
-                // ´ÙÀ½ Å¸°ÙÀÌ ¾øÀ¸¸é ÀÌµ¿ Á¾·áÇÏ´Â ÇÔ¼ö È£Ãâ
+                // ë‹¤ìŒ íƒ€ê²Ÿì´ ì—†ìœ¼ë©´ ì´ë™ ì¢…ë£Œí•˜ëŠ” í•¨ìˆ˜ í˜¸ì¶œ
                 ReachedGoal();
                 return;
             }
         }
 
-        // Å¸ÄÏ ³ëµå¿Í ¸ó½ºÅÍ À§Ä¡·Î ¹æÇâ ¹× °Å¸® È®ÀÎ
+        // íƒ€ì¼“ ë…¸ë“œì™€ ëª¬ìŠ¤í„° ìœ„ì¹˜ë¡œ ë°©í–¥ ë° ê±°ë¦¬ í™•ì¸
         Vector3 dir = targetPathNode.position - this.transform.position;
         
-        // ¸ó½ºÅÍ ÀÌµ¿ ¾Ö´Ï¸ŞÀÌ¼Ç ¼³Á¤
+        // ëª¬ìŠ¤í„° ì´ë™ ì• ë‹ˆë©”ì´ì…˜ ì„¤ì •
         //anim.SetBool("isRun", dir != Vector3.zero);
 
         
         float distThisFrame = currentSpeed * Time.deltaTime;
         if(dir.magnitude <= distThisFrame)
         {
-            // ³ëµå¿¡ µµÂø
+            // ë…¸ë“œì— ë„ì°©
             targetPathNode = null;
         }
         else
         {
-            // ³ëµå·Î ÀÌµ¿
+            // ë…¸ë“œë¡œ ì´ë™
             transform.Translate(dir.normalized * distThisFrame, Space.World);
             Quaternion targetRotation = Quaternion.LookRotation(dir);
             this.transform.rotation = Quaternion.Lerp(this.transform.rotation, targetRotation, Time.deltaTime * 5);
@@ -104,7 +108,7 @@ public class Enemy : MonoBehaviour
 
     public void GetNextPathNode()
     {
-        // path ¹è¿­ÀÌ ³¡³ªÁö ¾Ê¾Ò´Ù¸é ´ÙÀ½ ÀÎµ¦½º·Î ÀÌµ¿
+        // path ë°°ì—´ì´ ëë‚˜ì§€ ì•Šì•˜ë‹¤ë©´ ë‹¤ìŒ ì¸ë±ìŠ¤ë¡œ ì´ë™
         if (pathNodeIdx < pathGO.transform.childCount)
         {
             targetPathNode = pathGO.transform.GetChild(pathNodeIdx);
@@ -114,14 +118,17 @@ public class Enemy : MonoBehaviour
         {
             targetPathNode = null;
             ReachedGoal();
+            //photonView.RPC("ReachedGoal", RpcTarget.All);
+
+
         }
 
     }
 
-
+    [PunRPC]
     void ReachedGoal()
     {
-        // »ı¸í ±ğ°í ¸ó½ºÅÍ ºñÈ°¼ºÈ­
+        // ìƒëª… ê¹ê³  ëª¬ìŠ¤í„° ë¹„í™œì„±í™”
         LooseLife();
         // pathNodeIdx = 0;
         // targetPathNode = null;
@@ -132,19 +139,19 @@ public class Enemy : MonoBehaviour
 
     public void LooseLife()
     {
-        // BankÀÇ »ı¸í·Â °¨¼Ò ¸Ş¼Òµå È£Ãâ
-        if (bank == null)
+        // Bankì˜ ìƒëª…ë ¥ ê°ì†Œ ë©”ì†Œë“œ í˜¸ì¶œ
+        if (gm == null)
         {
             return;
         }
-        bank.LooseLife(lifePenalty);
+        gm.LooseLife(lifePenalty);
     }
 
     public void Death()
     {
         enemySpawner = GameObject.Find("startPoint").GetComponent<EnemySpawner>();
-        // EnemySpawner¿¡¼­ ¸®½ºÆ®·Î Àû Á¤º¸¸¦ °ü¸®ÇÏ±â ¶§¹®¿¡ Destroy()¸¦ Á÷Á¢ »ç¿ëÇÏÁö ¾Ê°í
-        // ÇÔ¼ö¸¦ È£Ãâ
+        // EnemySpawnerì—ì„œ ë¦¬ìŠ¤íŠ¸ë¡œ ì  ì •ë³´ë¥¼ ê´€ë¦¬í•˜ê¸° ë•Œë¬¸ì— Destroy()ë¥¼ ì§ì ‘ ì‚¬ìš©í•˜ì§€ ì•Šê³ 
+        // í•¨ìˆ˜ë¥¼ í˜¸ì¶œ
         enemySpawner.DestroyEnemy(this);
     }
 
@@ -159,6 +166,8 @@ public class Enemy : MonoBehaviour
         {
             // Debug.Log("character hit");
             ProcessHit(2 - armor);
+            //photonView.RPC("ProcessHit", RpcTarget.All, 2-armor);
+
         }
     }
 
@@ -169,22 +178,38 @@ public class Enemy : MonoBehaviour
 
     }
 
+    [PunRPC]
     public void ProcessHit(float Damage)
     {
+        // ì²´ë ¥ ê°ì†Œ
+        if (Damage > armor)
+        {
+            Damage -= armor;
+            currentHP -= Damage;
+            damageText.GetComponent<TMP_Text>().text = Damage.ToString();
+            if (currentHP > 0)
+            {
+                anim.SetTrigger("Hit");
+            }
+        }
+        else
+        {
+            damageText.GetComponent<TMP_Text>().text = "Blocked!";
+        }
 
-        
-        // Ã¼·Â °¨¼Ò
-        currentHP -= Damage;
-        damageText.GetComponent<TMP_Text>().text = Damage.ToString();
         GameObject Hit = Instantiate(damageText, transform.position, Quaternion.identity, this.GetComponentInChildren<Canvas>().transform);
         Destroy(Hit, 0.6f);
 
-        // Å×½ºÆ®¿ë Ã¼·Â°¨¼Ò
+        // í…ŒìŠ¤íŠ¸ìš© ì²´ë ¥ê°ì†Œ
         // currentHP -= 1;
 
 
         if (currentHP <= 0)
         {
+            currentSpeed = 0;
+            //Destroy(hpbar);
+            hpbar.SetActive(false);
+            anim.SetBool("isDeath", true);
             Death();
 
         }
@@ -198,19 +223,33 @@ public class Enemy : MonoBehaviour
             Weapon weapon = other.GetComponent<Weapon>();
             float weaponDamage = weapon.damage;
             ProcessHit(weaponDamage);
+            //photonView.RPC("ProcessHit", RpcTarget.All,weaponDamage);
         }
     }
 
+    [PunRPC]
     public void ProcessReduceSpeed(float reduce)
     {
         if (!deBuffed && currentSpeed == speed)
         {
-            Debug.Log("ÀÌ¼Ó °¨¼Ò!");
+            Debug.Log("ì´ì† ê°ì†Œ!");
             currentSpeed = speed * (1 - reduce);
             deBuffed = true;
             StartCoroutine(isDeBuffed());
         }
     }
+
+    public void ProcessReduceArmor(float reduce)
+    {
+        if (!deBuffed && currentSpeed == speed)
+        {
+            Debug.Log("ë°©ì–´ ê°ì†Œ!");
+            currentSpeed = armor * (1 - reduce);
+            deBuffed = true;
+            StartCoroutine(isDeBuffed());
+        }
+    }
+
     IEnumerator isDeBuffed()
     {
         yield return new WaitForSeconds(1f);
