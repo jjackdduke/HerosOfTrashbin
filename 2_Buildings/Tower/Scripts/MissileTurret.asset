@@ -23,8 +23,7 @@ MonoBehaviour:
     isParticle: 0
     isDeBuff: 0
     isZangPan: 0
-    missile: {fileID: 6709678017008513555, guid: c6520d8e9971b144fab4e035e217eea1,
-      type: 3}
-    missileUp: 25
-    missileWaitSecond: 1
-    missileSpeed: 50
+    missile: {fileID: 1374693194890512, guid: d8414a5e62be04d48904fe7b551b0cc8, type: 3}
+    missileUp: 50
+    missileWaitSecond: 5
+    missileSpeed: 100

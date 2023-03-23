@@ -12,9 +12,7 @@ public class CameraFollow : MonoBehaviourPunCallbacks
     // offset만큼 떨어져서 카메라 추적
     void Update()
     {
-       
-            transform.position = target.position + offset;
 
-        
+        transform.position = target.position + offset;
     }
 }

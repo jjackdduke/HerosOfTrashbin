@@ -7,6 +7,8 @@ using UnityEngine.XR;
 using static Cinemachine.CinemachineTargetGroup;
 using static UnityEditor.Experimental.GraphView.GraphView;
 using static UnityEngine.GraphicsBuffer;
+using TMPro;
+using OpenCover.Framework.Model;
 
 public class TowerWeapon : MonoBehaviour
 {
@@ -18,6 +20,7 @@ public class TowerWeapon : MonoBehaviour
     Enemy[] enemies;
     float attackTargetDistance;
     bool isMissile = false;
+    bool eDown;
 
     GameObject Spawner;
     [SerializeField] private TowerTemplate thisTowerTemplate;
@@ -27,14 +30,28 @@ public class TowerWeapon : MonoBehaviour
     float towerAttackRate => thisTowerTemplate.weapon[level - 1].rate;
     float towerAttackRange => thisTowerTemplate.weapon[level - 1].range;
     bool towerIsParticle => thisTowerTemplate.weapon[level - 1].isParticle;
-    bool towerIsDeBuff => thisTowerTemplate.weapon[level - 1].isDeBuff;
+    int towerIsDeBuff => thisTowerTemplate.weapon[level - 1].isDeBuff;
     bool towerIsZangPan => thisTowerTemplate.weapon[level - 1].isZangPan;
     GameObject towerMissile => thisTowerTemplate.weapon[level - 1].missile;
     float towerMissileUp => thisTowerTemplate.weapon[level - 1].missileUp;
     float towerMissileSpeed => thisTowerTemplate.weapon[level - 1].missileSpeed;
     float towerMissileWaitSecond => thisTowerTemplate.weapon[level - 1].missileWaitSecond;
+    ParticleSystem towerHitEffect => thisTowerTemplate.weapon[level - 1].hitEffect;
+
+
+
+    [SerializeField]
+    private TextMeshProUGUI thisActionText;
+
+    bool upgradeActivated;
+    bool isMaxUpgrade;
+    public void SetUp(TowerTemplate towerTemplate, TextMeshProUGUI actionText)
+    {
+        this.thisTowerTemplate = towerTemplate;
+        this.thisActionText = actionText;
+    }
     
-    public void SetUp(TowerTemplate towerTemplate)
+    public void SetUp2(TowerTemplate towerTemplate)
     {
         this.thisTowerTemplate = towerTemplate;
     }
@@ -77,9 +94,36 @@ public class TowerWeapon : MonoBehaviour
         Debug.Log(result);
     }
 
-    private void Update()
+    private void OnTriggerStay(Collider other)
     {
         
+        if (other.gameObject.tag == "Player" && !isMaxUpgrade)
+        {
+            UpgradeInfoAppear();
+
+            if (eDown && upgradeActivated)
+            {
+                bool result = Upgrade();
+                Debug.Log(result);
+            }
+
+        }else if(other.gameObject.tag == "Player" && isMaxUpgrade)
+        {
+            MaxUpgradeInfoAppear();
+        }
+        eDown = false;
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        UpgradeInfoDisappear();
+    }
+
+
+
+    private void Update()
+    {
+        eDown = Input.GetKeyDown(KeyCode.E);
         if (attackTarget != null && attackTargetDistance < towerAttackRange)
         {
             if (!towerIsParticle && !isMissile && !towerIsZangPan)
@@ -94,26 +138,34 @@ public class TowerWeapon : MonoBehaviour
         }
     }
     
-
+    // Todo : 최종 업그레이드 시 업그레이드 불가 메시지 띄우기
     private bool Upgrade()
     {
         gm = FindObjectOfType<GM>();
-        //Debug.Log(level);
-        //Debug.Log(childCnt);
-        //Debug.Log(thisTowerTemplate.weapon[level].cost);
-        if (level < childCnt && gm.Gold >= thisTowerTemplate.weapon[level].cost)
+        Debug.Log("level + 1: " + level + ", childCnt : " + childCnt);
+        if (level + 1>= childCnt)
+        {
+            isMaxUpgrade = true;
+            return true;
+        }
+
+        if (level + 1< childCnt && gm.Gold >= thisTowerTemplate.weapon[level].cost)
         {
             transform.GetChild(level).gameObject.SetActive(false);
             level++;
             transform.GetChild(level).gameObject.SetActive(true);
-            gm.Withdraw(thisTowerTemplate.weapon[level - 1].cost);
+            gm.Withdraw(thisTowerTemplate.weapon[level - 1].cost, false);
             SpecialTower();
+            
             return true;
         }
         else
         {
+            UpgradeInfoDisappear();
             return false;
         }
+
+        
     }
 
     void SpecialTower()
@@ -141,8 +193,8 @@ public class TowerWeapon : MonoBehaviour
             foreach (Enemy enemy in enemies)
             {
                 float targetDistance = Vector3.Distance(transform.position, enemy.transform.position);
-                float enemyHP = enemy.GetComponent<Enemy>().CurrentHP;
-                if (targetDistance < maxDistance && enemyHP > 0)
+
+                if (targetDistance < maxDistance)
                 {
                     closestTarget = enemy.transform;
                     maxDistance = targetDistance;
@@ -154,7 +206,6 @@ public class TowerWeapon : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
     }
-
     
     private IEnumerator MissileAttack()
     {
@@ -175,14 +226,15 @@ public class TowerWeapon : MonoBehaviour
                 {
                     effect.Play();
                     Enemy enemy = hitInfo.collider.GetComponent<Enemy>();
-                    if (towerIsDeBuff)
+                    if (towerIsDeBuff > 0)
                     {
-                        enemy.ProcessReduceSpeed(towerDamage);
+                        DeBuffAttack(enemy);
                     }
                     else
                     {
                         enemy.ProcessHit(towerDamage);
                     }
+                    ParticleSystem Hit = Instantiate(towerHitEffect, enemy.transform.position, Quaternion.identity);
                 }
             }
             yield return new WaitForSeconds(towerAttackRate);
@@ -205,6 +257,7 @@ public class TowerWeapon : MonoBehaviour
 
     void ZangPanGi(Vector3 center, float radius)
     {
+
         Collider[] hitColliders = Physics.OverlapSphere(center, radius);
         int i = 0;
         while (i < hitColliders.Length)
@@ -212,12 +265,51 @@ public class TowerWeapon : MonoBehaviour
             if (hitColliders[i].gameObject.tag == "Enemy")
             {
                 Enemy enemy = hitColliders[i].gameObject.GetComponent<Enemy>();
-                //Debug.Log(enemy.name);
-                //Enemy enemy = hitColliders[i].GetComponent<Enemy>();
-                enemy.ProcessReduceSpeed(towerDamage);
+
+                if (towerIsDeBuff > 0)
+                {
+                    DeBuffAttack(enemy);
+                    ParticleSystem Hit = Instantiate(towerHitEffect, enemy.transform.position, Quaternion.identity);
+                }
             }
             i++;
         }
+    }
+
+    void DeBuffAttack (Enemy enemy)
+    {
+        switch (towerIsDeBuff)
+        {
+            case 1:
+                enemy.ProcessReduceSpeed(towerDamage);
+                break;
+
+            case 2:
+                enemy.ProcessReduceArmor(towerDamage);
+                break;
+        }
+    }
+
+
+    private void UpgradeInfoAppear()
+    {
+        upgradeActivated = true;
+        thisActionText.gameObject.SetActive(true);
+        thisActionText.text = "타워 업그레이드 " + "<color=yellow>" + "(E)" + "</color>";
+    }
+
+    private void UpgradeInfoDisappear()
+    {
+        upgradeActivated = false;
+        thisActionText.gameObject.SetActive(false);
+    }
+
+
+    private void MaxUpgradeInfoAppear()
+    {
+
+        thisActionText.gameObject.SetActive(true);
+        thisActionText.text = "최대 업그레이드 입니다." + "<color=yellow>" + "</color>";
     }
 }
 

@@ -18,11 +18,12 @@ public class TowerTemplate : ScriptableObject
         public float range;
         public int cost;
         public bool isParticle;
-        public bool isDeBuff;
+        public int isDeBuff;
         public bool isZangPan;
         public GameObject missile;
         public float missileUp;
         public float missileWaitSecond;
         public float missileSpeed;
+        public ParticleSystem hitEffect;
     }
 }

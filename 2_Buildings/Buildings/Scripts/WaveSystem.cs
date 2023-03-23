@@ -6,7 +6,7 @@ public class WaveSystem : MonoBehaviour
 {
     // 현재 스테이지의 모든 웨이브 정보
     [SerializeField] private Wave[] waves;
-    public int EndWave { get { return waves.Length; } }
+    public int FinalWave { get { return waves.Length; } }
 
     [SerializeField] private EnemySpawner enemySpawner;
     

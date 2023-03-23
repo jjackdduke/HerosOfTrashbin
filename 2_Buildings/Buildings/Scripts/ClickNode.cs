@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static TowerTemplate;
 using Random = System.Random;
+using TMPro;
 
 public class ClickNode : MonoBehaviour
 {
@@ -22,7 +23,11 @@ public class ClickNode : MonoBehaviour
     [SerializeField] TowerTemplate FirePrefab;
     [SerializeField] TowerTemplate IcePrefab;
     [SerializeField] TowerTemplate GunPrefab;
-    [SerializeField] TowerTemplate SlowPrefab;
+    [SerializeField] TowerTemplate CursePrefab;
+
+
+    [SerializeField]
+    private TextMeshProUGUI actionText;
 
     // �������� ����
     public Renderer rend;
@@ -37,6 +42,8 @@ public class ClickNode : MonoBehaviour
     private float buildDelay = 0.3f;
     GameObject arrow;
 
+    bool buildActivated;
+
     void Awake()
     {
         gm = FindObjectOfType<GM>();
@@ -46,43 +53,25 @@ public class ClickNode : MonoBehaviour
     }
 
 
-    private void OnMouseUp()
+    private void OnTriggerStay(Collider other)
     {
-        if (isBuilt == 0)
+        if(other.gameObject.tag == "Player")
         {
-            bool isSuccessful;
-            
-            randomValue = randomObj.Next(2, 6);
-            //Debug.Log(randomValue);
-            rend.material.color = SelectColor;
-            // Ÿ���� ��ġ�Ǿ� ���� ���� ��ġ��� Ÿ�������տ� ����� ��ũ��Ʈ������ Ÿ�� ��ġ �޼ҵ� ����
-            if (randomValue >= 5)
+            BuildInfoAppear();
+
+            if (Input.GetKey(KeyCode.E))
             {
-                isSuccessful = CreateTower(SlowPrefab, transform.position);
-                isBuilt = 5;
-            }
-            else if (randomValue == 4)
-            {
-                isSuccessful = CreateTower(GunPrefab, transform.position); 
-                isBuilt = 4;
-            }
-            else if (randomValue == 3)
-            {
-                isSuccessful = CreateTower(TurretPrefab, transform.position);
-                isBuilt = 3;
-            }
-            else if (randomValue == 2)
-            {
-                isSuccessful = CreateTower(FirePrefab, transform.position);
-                isBuilt = 2;
-            }
-            else
-            {
-                isSuccessful = CreateTower(IcePrefab, transform.position);
-                isBuilt = 1;
+                BuildTower();
             }
 
+            Debug.Log("타워노드 접근");
         }
+        
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        BuildInfoDisappear();
     }
 
     public bool CreateTower(TowerTemplate towerTemplate, Vector3 position)
@@ -100,7 +89,7 @@ public class ClickNode : MonoBehaviour
             StartCoroutine(Build());
             // cost += inflation;
 
-            towerClone.GetComponent<TowerWeapon>().SetUp(towerTemplate);
+            towerClone.GetComponent<TowerWeapon>().SetUp(towerTemplate, actionText);
             gameObject.SetActive(false);
 
             return true;
@@ -131,6 +120,60 @@ public class ClickNode : MonoBehaviour
             }
         }
 
+    }
+
+
+    private void BuildTower()
+    {
+        if (isBuilt == 0 && buildActivated)
+        {
+            bool isSuccessful;
+            
+            randomValue = randomObj.Next(1, 6);
+            //Debug.Log(randomValue);
+            rend.material.color = SelectColor;
+            if (randomValue >= 5)
+            {
+                isSuccessful = CreateTower(CursePrefab, transform.position);
+                isBuilt = 5;
+            }
+            else if (randomValue == 4)
+            {
+                isSuccessful = CreateTower(GunPrefab, transform.position); 
+                isBuilt = 4;
+            }
+            else if (randomValue == 3)
+            {
+                isSuccessful = CreateTower(TurretPrefab, transform.position);
+                isBuilt = 3;
+            }
+            else if (randomValue == 2)
+            {
+                isSuccessful = CreateTower(FirePrefab, transform.position);
+                isBuilt = 2;
+            }
+            else
+            {
+                isSuccessful = CreateTower(IcePrefab, transform.position);
+                isBuilt = 1;
+            }
+
+            BuildInfoDisappear();
+        }
+    }
+
+
+    private void BuildInfoAppear()
+    {
+        buildActivated = true;
+        actionText.gameObject.SetActive(true);
+        actionText.text =  "타워 건설 " + "<color=yellow>" + "(E)" + "</color>";
+    }
+
+    private void BuildInfoDisappear()
+    {
+        buildActivated = false;
+        actionText.gameObject.SetActive(false);
     }
 
     public void Arrow(bool show)

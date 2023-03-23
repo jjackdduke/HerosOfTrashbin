@@ -20,7 +20,7 @@ public class EnemySpawner : MonoBehaviour
     private Wave currentWave;
 
     // 현재 맵에 존재하는 모든 적의 정보
-    public List<Enemy> enemyList;
+    private List<Enemy> enemyList;
 
     // 적의 생성과 삭제는 EnemySpawner에서 하기 때문에 Set은 필요 없다.
     public List<Enemy> EnemyList => enemyList;

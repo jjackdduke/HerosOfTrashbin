@@ -12,13 +12,14 @@ public class Missile : MonoBehaviour
     [SerializeField]  private float thisMissileSpeed = 0f;
     float currentSpeed = 0f;
     float thisMissileWaitSecond = 0f;
-    [SerializeField] ParticleSystem thisEffect = null;
+    [SerializeField] ParticleSystem[] thisEffect = null;
+    public ParticleSystem missileHitEffect;
 
     TargetLocator missileTurret;
     bool fire = false;
-    bool thisDeBuff = false;
+    int thisDeBuff;
 
-    public void SetUp(Transform attackTarget, float damage, float missileSpeed, float missileWaitSecond, bool deBuff)
+    public void SetUp(Transform attackTarget, float damage, float missileSpeed, float missileWaitSecond, int deBuff)
     {
         this.thisTarget = attackTarget;
         this.thisDamage = damage;
@@ -43,7 +44,10 @@ public class Missile : MonoBehaviour
         rigidBody = GetComponent<Rigidbody>();
         if (thisEffect != null)
         {
-            thisEffect.Play();
+            foreach (ParticleSystem effect in thisEffect)
+            {
+                effect.Play();
+            }
         }
         StartCoroutine(LaunchDelay());
     }
@@ -52,7 +56,7 @@ public class Missile : MonoBehaviour
     {
         if (thisTarget)
         {
-            if (currentSpeed <= thisMissileSpeed)
+            if (currentSpeed <= thisMissileSpeed)   
                 currentSpeed += thisMissileSpeed * Time.deltaTime;
 
             transform.position += transform.up * currentSpeed * Time.deltaTime;
@@ -106,14 +110,30 @@ public class Missile : MonoBehaviour
         {
             Destroy(gameObject);
             Enemy enemy = collision.gameObject.GetComponent<Enemy>();
-            if (thisDeBuff)
+            if (thisDeBuff > 0)
             {
-                enemy.ProcessReduceSpeed(thisDamage);
+                DeBuffAttack(enemy);
+                Instantiate(missileHitEffect, enemy.transform.position, Quaternion.identity);
             }   
             else
             {
                 enemy.ProcessHit(thisDamage);
+                Instantiate(missileHitEffect, enemy.transform.position, Quaternion.identity);
             }
+        }
+    }
+
+    void DeBuffAttack(Enemy enemy)
+    {
+        switch (thisDeBuff)
+        {
+            case 1:
+                enemy.ProcessReduceSpeed(thisDamage);
+                break;
+
+            case 2:
+                //enemy.ProcessReduceArmor(towerDamage);
+                break;
         }
     }
 
