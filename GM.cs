@@ -8,134 +8,226 @@ using TMPro;
 public class GM : MonoBehaviour
 {
     /*
-    1. ¾À ¼±ÅÃ ±â´É
+    1. ì”¬ ì„ íƒ ê¸°ëŠ¥
 
-    2. ÆË¾÷ ¾À ¼±ÅÃ ±â´É? (¿ÀºêÁ§Æ®¿¡ OnClickÀ¸·Î ´Ù´Â °Ô ³ªÀ»Áö´Â ¹ÌÁ¤)
+    2. íŒì—… ì”¬ ì„ íƒ ê¸°ëŠ¥? (ì˜¤ë¸Œì íŠ¸ì— OnClickìœ¼ë¡œ ë‹¤ëŠ” ê²Œ ë‚˜ì„ì§€ëŠ” ë¯¸ì •)
 
-    3. °ÔÀÓ ¾Ë¸² ¸Ş½ÃÁö Ç¥½Ã ±â´É
-        - °ğ °ÔÀÓÀÌ ½ÃÀÛµË´Ï´Ù.
-        - ´ÙÀ½ ½ºÅ×ÀÌÁö·Î ÀÌµ¿ÇØ ÁÖ¼¼¿ä.
-        - ±¤»êÀ¸·Î °¡¼­ Äù½ºÆ®¸¦ ÁøÇàÇØÁÖ¼¼¿ä.
-        - ??´ÔÀÌ ¾ÆÀÌÅÛÀ» »ç¿ëÇß½À´Ï´Ù!
+    3. ê²Œì„ ì•Œë¦¼ ë©”ì‹œì§€ í‘œì‹œ ê¸°ëŠ¥
+        - ê³§ ê²Œì„ì´ ì‹œì‘ë©ë‹ˆë‹¤.
+        - ë‹¤ìŒ ìŠ¤í…Œì´ì§€ë¡œ ì´ë™í•´ ì£¼ì„¸ìš”.
+        - ê´‘ì‚°ìœ¼ë¡œ ê°€ì„œ í€˜ìŠ¤íŠ¸ë¥¼ ì§„í–‰í•´ì£¼ì„¸ìš”.
+        - ??ë‹˜ì´ ì•„ì´í…œì„ ì‚¬ìš©í–ˆìŠµë‹ˆë‹¤!
 
-    4. HUD¿¡ Ç¥½ÃÇÒ º¯¼ö
-        - ½ºÅ×ÀÌÁö, ¿şÀÌºê Á¤º¸
-        - ³²Àº ½Ã°£
-        - ³²Àº Àû ¸¶¸´¼ö, ÇÃ·¹ÀÌ¾î°¡ ÀâÀº Àû ¸¶¸´¼ö
-        - ÇÃ·¹ÀÌ¾î ¼ÒÁö °ñµå
-        - ±âÁöÀÇ ³²Àº Ã¼·Â
-        - ÇÃ·¹ÀÌ¾îÀÇ Æ÷Å¾ ¼³Ä¡ ¿©ºÎ?
+    4. HUDì— í‘œì‹œí•  ë³€ìˆ˜
+        - ìŠ¤í…Œì´ì§€, ì›¨ì´ë¸Œ ì •ë³´
+        - ë‚¨ì€ ì‹œê°„
+        - ë‚¨ì€ ì  ë§ˆë¦¿ìˆ˜, í”Œë ˆì´ì–´ê°€ ì¡ì€ ì  ë§ˆë¦¿ìˆ˜
+        - í”Œë ˆì´ì–´ ì†Œì§€ ê³¨ë“œ
+        - ê¸°ì§€ì˜ ë‚¨ì€ ì²´ë ¥
+        - í”Œë ˆì´ì–´ì˜ í¬íƒ‘ ì„¤ì¹˜ ì—¬ë¶€?
 
-    5. ÃÖÁ¾ °á°ú Ç¥½Ã
-        - ¼­¹ö¿Í Åë½ÅÇØ¼­ ¹æ ¾È¿¡ ÀÖ´Â ÇÃ·¹ÀÌ¾îµéÀÇ Á¤º¸¸¦ ¹Ş¾Æ¿À±â
+    5. ìµœì¢… ê²°ê³¼ í‘œì‹œ
+        - ì„œë²„ì™€ í†µì‹ í•´ì„œ ë°© ì•ˆì— ìˆëŠ” í”Œë ˆì´ì–´ë“¤ì˜ ì •ë³´ë¥¼ ë°›ì•„ì˜¤ê¸°
 
-    6. Ãß°¡·Î ÀúÀåÇØ¾ßÇÒ Á¤º¸µé
+    6. ì¶”ê°€ë¡œ ì €ì¥í•´ì•¼í•  ì •ë³´ë“¤
         - killCount(Tower kill, Player kill)
-        - ¾÷Àû ÀúÀåÇÒ °ø°£
-        - ±× ¿Ü ÀÎ°ÔÀÓ °á°ú°ªµé..(»ı°¢ÇØº¸±â)
+        - ì—…ì  ì €ì¥í•  ê³µê°„
+        - ê·¸ ì™¸ ì¸ê²Œì„ ê²°ê³¼ê°’ë“¤..(ìƒê°í•´ë³´ê¸°)
     */
 
-    // ±âÅ¸ º¯¼ö
+    // ê¸°íƒ€ ë³€ìˆ˜
+
+    // 1. ì”¬ì •ë³´
     private string nowScene = "InGame";
 
-    // À¯Àú Á¤º¸
-    private string playerName;
-    private int gold = 0;
+    // 2. íŒì—… ì—¬ë¶€(1ê°œë¼ë„ ë„ì›Œì ¸ ìˆìœ¼ë©´ ê²Œì„ í™”ë©´ì€ ëª¨ë“  ë§ˆìš°ìŠ¤, í‚¤ë³´ë“œ ì…ë ¥ ë¹„í™œì„±í™”)
+    private bool isPopup = false;
+
+    // 3. ê¸°ì§€ì—ì„œ ê°€ì¥ ê°€ê¹Œìš´ ì ì˜ ìœ„ì¹˜(ì ¤ì•ì transform.position)
+    private List<Enemy> enemyList;
+    private Transform enemyNavi;
+
+    // 4. ë°©ì¥ì˜ ê²Œì„ ì‹œì‘ ì—¬ë¶€
+    private bool isGameStart = false;
+
+    // 5. ë‚´ê°€ ì„¤ì¹˜í•œ í¬íƒ‘ì˜ ìœ„ì¹˜
+    private Transform myTowerNavi;
+
+    // 6. ìƒëŒ€ì˜ ìœ„ì¹˜, ë‚˜ì™€ ë‹¤ë¥¸ ì‚¬ëŒì´ ì„¤ì¹˜í•œ í¬íƒ‘ì˜ ìœ„ì¹˜?, ëŠ¥ë ¥ì¹˜, ê³¨ë“œ ë“±(ì¶”ê°€)
+
+    // 7. ì•Œë¦¼ì°½ ì½”ë©˜íŠ¸(ì´ê±° ì–µë•í•˜ì§€ ì¢€ ë¹¡ì„¸ë„¤)
+
+    // ê³„ì • ì •ë³´
+    private int userExp = 1;
+    private int userLv = 1;
+
+    // ìœ ì € ì •ë³´
+    private string playerName = "TEST";
+    private int characterIdx = 0;
+    //default gold is 0
+    private int gold = 1000;
     public int Gold { get { return gold; } }
 
-    private int towerCnt = 1;
+    //deafult 1
+    private int towerCnt = 10;
     public int TowerCnt { get { return towerCnt; } }
     private int killCnt = 0;
 
-    // °ÔÀÓ Á¤º¸
+    // ìºë¦­í„° status(ì¼ë‹¨ ë³´ë¥˜)(ê°•í™”ì •ë³´)
+
+
+    // ê²Œì„ ì •ë³´
     private int stage = 1;
-    private int wave = 1;
-    private int endWave;
-    private int life;
+    private List<GameObject> myItems;
+    public List<GameObject> MyItems { get { return myItems; } }
+    private int wave = 0;
+    private int waveMobTotal = 10;
+    private int life = 100;
     private int mobCnt = 0;
     private int timer = 100;
+    private int finalWave = 30;
 
+    GameObject startPoint;
+    // SerializeField
 
-    // ¹Ş¾Æ¿Í¾ßÇÒ °ªµé
+    [SerializeField] GameObject stageText;
+    [SerializeField] GameObject waveText;
+    [SerializeField] GameObject waveMobTotalText;
+    [SerializeField] GameObject lifeText;
+    [SerializeField] GameObject mobCntText;
+    [SerializeField] GameObject timerText;
+    [SerializeField] GameObject towerCntText;
+    [SerializeField] GameObject killCntText;
+    [SerializeField] GameObject goldText;
+
+    [Tooltip("ìºë¦­í„° ì„ íƒ UI")]
+    [SerializeField] GameObject CharacterSelectPrefab;
+    [Tooltip("ë³´ìƒ UI")]
+    [SerializeField] GameObject WaveClearPrefab;
+    [Tooltip("ê²°ê³¼ UI")]
+    [SerializeField] GameObject ResultPrefab;
+    [Tooltip("ìƒí˜¸ì‘ìš© UI")]
+    [SerializeField] GameObject InteractionPrefeb;
+
+    // ë°›ì•„ì™€ì•¼í•  ê°’ë“¤
+    private void Awake()
+    {
+        startPoint = GameObject.FindGameObjectWithTag("StartPoint");
+    }
     private void Start()
     {
-        endWave = GetComponent<WaveSystem>().EndWave;
+        finalWave = startPoint.GetComponent<WaveSystem>().FinalWave;
+        enemyList = startPoint.GetComponent<EnemySpawner>().EnemyList;
     }
 
-
-    // Å¸¿ö ¼³Ä¡
+    // íƒ€ì›Œ ì„¤ì¹˜
     public void BuildTower()
     {
         towerCnt -= 1;
-        // UI °ü¸® ÇÔ¼ö È£Ãâ
+        // towerCntText.GetComponent<TMP_Text>().text = towerCnt.ToString();
     }
 
-    // µ· ¾²´Â°Å
-    public void Withdraw(int amount)
+    private void Update()
     {
-        gold -= Mathf.Abs(amount);
-        // UI °ü¸® ÇÔ¼ö È£Ãâ
+        if (enemyList.Count > 0)
+        {
+            enemyNavi = enemyList[0].transform;
+        }
     }
 
-    // »ç³É Á¤º¸
+    // ëˆ ê´€ë¦¬
+    public void Withdraw(int amount, bool isPlus)
+    {
+        if (isPlus)
+        {
+            gold += amount;
+        }
+        else
+        {
+            gold -= Mathf.Abs(amount);
+        }
+        // goldText.GetComponent<TMP_Text>().text = gold.ToString();
+    }
+
+    // ê²Œì„ ì‹œì‘
+    public void GameStart()
+    {
+        isGameStart = true;
+        // timerText.GetComponent<TMP_Text>().text = "START";
+        startPoint.GetComponent<WaveSystem>().StartWave();
+    }
+
+    // ëª¹ ì •ë³´
     public void Deposit()
     {
         killCnt += 1;
         mobCnt -= 1;
-        // UpdateDisplay();
+        // killCntText.GetComponent<TMP_Text>().text = killCnt.ToString();
+        // mobCntText.GetComponent<TMP_Text>().text = mobCnt.ToString();
     }
 
-    // »ı¸í·Â °¨¼Ò
+    // ìƒëª…ë ¥ ê°ì†Œ
     public void LooseLife(int amount)
     {
         life -= Mathf.Abs(amount);
 
         if (life <= 0)
         {
-            //°ÔÀÓ¿À¹ö ¸Ş¼Òµå È£Ãâ
+            //ê²Œì„ì˜¤ë²„ ë©”ì†Œë“œ í˜¸ì¶œ
         }
     }
 
-    // Å¸ÀÌ¸Ó
-    public IEnumerator Timer()
+    // íƒ€ì´ë¨¸
+    private IEnumerator Timer()
     {
         while ( timer > 0)
         {
             timer -= 1;
-            // µğ½ºÇÃ·¹ÀÌ ¾÷µ¥ÀÌÆ®
+            // timerText.GetComponent<TMP_Text>().text = timer.ToString();
             yield return new WaitForSeconds(1);
         }
-        timer = 100;
+        // timerText.GetComponent<TMP_Text>().text = "START";
+        startPoint.GetComponent<WaveSystem>().StartWave();
     }
 
-    // Å¸ÀÌ¸Ó ½ÃÀÛ
-    public void StartTimer()
+    // íƒ€ì´ë¨¸ ì‹œì‘
+    private void StartTimer()
     {
+        timer = 100;
+        // timerText.GetComponent<TMP_Text>().text = timer.ToString();
         StartCoroutine("Timer");
     }
 
-    // ¿şÀÌºê Å¬¸®¾î
+    // ì›¨ì´ë¸Œ í´ë¦¬ì–´
     private void ClearWave()
     {
-
-    }
-
-    // UI°ü¸®ÀÚ
-    private void UpdateUI()
-    {
-        // Å¸¿ö ¼³Ä¡
-        // µ· ¾²´Â°Å
-        // »ç³É Á¤º¸
-        // »ı¸í·Â °¨¼Ò
-        // Å¸ÀÌ¸Ó
+        // í•´ë‹¹ ì›¨ì´ë¸Œ í´ë¦¬ì–´, ë³´ìƒ UI ì¶œë ¥, ìµœì¢…ì›¨ì´ë¸Œ í´ë¦¬ì–´ì‹œ ê²Œì„ì…‹
+        if (wave < finalWave)
+        {
+            wave += 1;
+            // waveText.GetComponent<TMP_Text>().text = wave.ToString();
+            StartTimer();
+        } else
+        {
+            GameEnd(true);
+        }        
     }
 
     private void GameEnd(bool gameResult)
     {
-        // °á°ú UI Ãâ·Â
+        // ê²°ê³¼ UI ì¶œë ¥
+        // gameResult ê°€ trueë©´ ê²Œì„ì„ í´ë¦¬ì–´í•œ ending, falseë©´ í´ë¦¬ì–´ ì‹¤íŒ¨ ending
+        if(gameResult)
+        {
+            // clear ending
+        }
+        else
+        {
+            // failure ending
+        }
     }
 
-    // Å×½ºÆ®¿ë ¹öÆ°
+    // í…ŒìŠ¤íŠ¸ìš© ë²„íŠ¼
     private void ClickBtn()
     {
         // 1 : 
@@ -144,22 +236,22 @@ public class GM : MonoBehaviour
             Debug.Log("/");
         }
 
-        // 0, -, = : ¾À ÀüÈ¯
+        // 0, -, = : ì”¬ ì „í™˜
         if (Input.GetKey(KeyCode.Keypad0) && nowScene != "Login")
         {
-            Debug.Log("¾ÀÀüÈ¯");
+            Debug.Log("ì”¬ì „í™˜");
             nowScene = "Login";
             SceneManager.LoadScene(6);
         }
         if (Input.GetKey(KeyCode.KeypadMinus) && nowScene != "InGame")
         {
-            Debug.Log("¾ÀÀüÈ¯");
+            Debug.Log("ì”¬ì „í™˜");
             nowScene = "InGame";
             SceneManager.LoadScene(5);
         }
         if (Input.GetKey(KeyCode.KeypadEquals) && nowScene != "Main")
         {
-            Debug.Log("¾ÀÀüÈ¯");
+            Debug.Log("ì”¬ì „í™˜");
             nowScene = "Main";
             SceneManager.LoadScene(4);
         }
