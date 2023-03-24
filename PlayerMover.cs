@@ -9,7 +9,8 @@ public class PlayerMover : MonoBehaviour
     //[SerializeField] GameObject laser;
 
     // 이동 속도
-    [SerializeField] float moveSpeed = 20.0f;
+    [SerializeField] float moveSpeed;
+    public float jumpPower = 30;
 
 
     // 회전 속도
@@ -17,6 +18,7 @@ public class PlayerMover : MonoBehaviour
 
     Animator anim;
     Rigidbody rigid;
+    PlayerStat playerStat;
 
     float h, v;
 
@@ -28,7 +30,9 @@ public class PlayerMover : MonoBehaviour
     bool skillDown;
     bool isBorder;
     bool isRun;
+    bool jDown;
 
+    bool isJump;
 
     Weapon equipWeapon;
 
@@ -45,24 +49,19 @@ public class PlayerMover : MonoBehaviour
         anim = GetComponent<Animator>();
         equipWeapon = GetComponentInChildren<Weapon>();
         rigid = GetComponent<Rigidbody>();
+        playerStat = GetComponent<PlayerStat>();
 
     }
 
     void Update()
     {
-        
-        v = Input.GetAxis("Vertical"); // 앞 뒤 움직임
-        h = Input.GetAxis("Horizontal"); // 좌 우 회전
-        iDown = Input.GetButtonDown("Interaction");
-        fDown = Input.GetButtonDown("Fire1");
-        skillDown = Input.GetButtonDown("Fire2");
-        isRun = Input.GetKey(KeyCode.LeftShift);
 
-        
-        
-        
+
+        GetInput();
+
         Attack();
         Move();
+        Jump();
         Rotate();
 
         
@@ -76,13 +75,16 @@ public class PlayerMover : MonoBehaviour
         StopToWallI();
     }
 
-    //void GetInput()
-    //{
-        
-    //    iDown = Input.GetButtonDown("Interaction");
-    //    fDown = Input.GetButtonDown("Fire1");
-    //    skillDown = Input.GetButtonDown("Fire2");
-    //}
+    void GetInput()
+    {
+        v = Input.GetAxis("Vertical"); // 앞 뒤 움직임
+        h = Input.GetAxis("Horizontal"); // 좌 우 회전
+        iDown = Input.GetButtonDown("Interaction");
+        fDown = Input.GetButtonDown("Fire1");
+        jDown = Input.GetButtonDown("Jump");
+        skillDown = Input.GetButtonDown("Fire2");
+        isRun = Input.GetKey(KeyCode.LeftShift);
+    }
 
     void FreezeRotation()
     {
@@ -136,6 +138,7 @@ public class PlayerMover : MonoBehaviour
     {
         if (fDown) return;
 
+        moveSpeed = playerStat.CurrentSpeed;
         float local_moveSpeed = moveSpeed;
 
         moveVec = new Vector3(h, 0, v);
@@ -171,7 +174,24 @@ public class PlayerMover : MonoBehaviour
 
     }
 
-    
+    void Jump()
+    {
+        if (jDown && !isJump)
+        {
+            rigid.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+            isJump = true;
+        }
+    }
+
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.tag == "Floor")
+        {
+            isJump = false;
+        }
+    }
+
 
 
 }
