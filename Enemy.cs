@@ -6,6 +6,8 @@ using TMPro;
 using Photon;
 using Photon.Pun;
 using Photon.Realtime;
+using System.Runtime.InteropServices;
+
 public class Enemy : MonoBehaviourPunCallbacks
 {
     // 몬스터 경로 오브젝트 변수 선언
@@ -34,7 +36,8 @@ public class Enemy : MonoBehaviourPunCallbacks
     public int lifePenalty;
     // 몬스터 속도
     public float speed;
-    bool deBuffed;
+    bool deBuffedSpeed;
+    bool deBuffedArmor;
 
     private EnemySpawner enemySpawner;
 
@@ -46,11 +49,16 @@ public class Enemy : MonoBehaviourPunCallbacks
 
     private float currentHP;
     private float currentSpeed;
+    private float currentArmor;
 
     [SerializeField] GameObject greenHP;
     [SerializeField] GameObject hpbar;
     [SerializeField] GameObject damageText;
 
+    // 피격 이펙트
+    ParticleSystem HitEffects;
+
+    new Collider collider;
 
     void Start()
     {
@@ -62,7 +70,9 @@ public class Enemy : MonoBehaviourPunCallbacks
 
         currentHP = mobHP;
         currentSpeed = speed;
+        currentArmor = armor;
         anim = this.transform.GetChild(0).GetComponent<Animator>();
+        collider = gameObject.GetComponent<Collider>();
     }
 
     // Update is called once per frame
@@ -179,12 +189,18 @@ public class Enemy : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    public void ProcessHit(float Damage)
+    public void ProcessHit(float Damage, [Optional] ParticleSystem effect)
     {
-        // 체력 감소
-        if (Damage > armor)
+        if (effect)
         {
-            Damage -= armor;
+        HitEffects = effect;
+        Instantiate(HitEffects, transform.position, Quaternion.identity);
+
+        }
+        // 체력 감소
+        if (Damage > currentArmor)
+        {
+            Damage -= currentArmor;
             currentHP -= Damage;
             damageText.GetComponent<TMP_Text>().text = Damage.ToString();
             if (currentHP > 0)
@@ -206,10 +222,13 @@ public class Enemy : MonoBehaviourPunCallbacks
 
         if (currentHP <= 0)
         {
+            gm.MobCounter(false);
+            collider.enabled = false;
             currentSpeed = 0;
             //Destroy(hpbar);
             hpbar.SetActive(false);
-            anim.SetBool("isDeath", true);
+            //anim.SetBool("isDeath", true);
+            anim.SetTrigger("Death");
             Death();
 
         }
@@ -221,27 +240,51 @@ public class Enemy : MonoBehaviourPunCallbacks
         {
   
             Weapon weapon = other.GetComponent<Weapon>();
-            float weaponDamage = weapon.damage;
-            ProcessHit(weaponDamage);
+            PlayerStat playerStat = other.GetComponentInParent<PlayerStat>();
+            float attackDamage = weapon.damage + playerStat.CurrentDamage;
+            ProcessHit(attackDamage);
             //photonView.RPC("ProcessHit", RpcTarget.All,weaponDamage);
         }
     }
 
     [PunRPC]
-    public void ProcessReduceSpeed(float reduce)
+    public void ProcessReduceSpeed(float reduce, ParticleSystem effect)
     {
-        if (!deBuffed && currentSpeed == speed)
+        if (!deBuffedSpeed && currentSpeed == speed)
         {
+            HitEffects = effect;
             Debug.Log("이속 감소!");
+            Instantiate(HitEffects, transform.position, Quaternion.identity);
             currentSpeed = speed * (1 - reduce);
-            deBuffed = true;
-            StartCoroutine(isDeBuffed());
+            deBuffedSpeed = true;
+            StartCoroutine(isDeBuffedSpeed());
         }
     }
-    IEnumerator isDeBuffed()
+
+    public void ProcessReduceArmor(float reduce, ParticleSystem effect)
+    {
+        if (!deBuffedArmor && currentSpeed == speed)
+        {
+            HitEffects = effect;
+            Debug.Log("방어 감소!");
+            Instantiate(HitEffects, transform.position, Quaternion.identity);
+            currentArmor = armor * (1 - reduce);
+            deBuffedArmor = true;
+            StartCoroutine(isDeBuffedArmor());
+        }
+    }
+
+    IEnumerator isDeBuffedSpeed()
     {
         yield return new WaitForSeconds(1f);
-        deBuffed = false;
+        deBuffedSpeed = false;
         currentSpeed = speed;
+    }
+
+    IEnumerator isDeBuffedArmor()
+    {
+        yield return new WaitForSeconds(1f);
+        deBuffedArmor = false;
+        currentArmor = armor;
     }
 }

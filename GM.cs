@@ -36,6 +36,7 @@ public class GM : MonoBehaviour
     */
 
     // 기타 변수
+    public bool isEndWave = false;
 
     // 1. 씬정보
     private string nowScene = "InGame";
@@ -65,7 +66,7 @@ public class GM : MonoBehaviour
     private string playerName = "TEST";
     private int characterIdx = 0;
     //default gold is 0
-    private int gold = 1000;
+    private int gold = 100;
     public int Gold { get { return gold; } }
 
     //deafult 1
@@ -77,46 +78,58 @@ public class GM : MonoBehaviour
 
 
     // 게임 정보
+    private Wave[] allWaveInfos;
     private int stage = 1;
     private List<GameObject> myItems;
     public List<GameObject> MyItems { get { return myItems; } }
-    private int wave = 0;
-    private int waveMobTotal = 10;
+    private int wave = 1;
+    //private int waveMobTotal;
     private int life = 100;
     private int mobCnt = 0;
-    private int timer = 100;
+    private int timer = 10;
     private int finalWave = 30;
 
     GameObject startPoint;
+    GameObject startBtn;
     // SerializeField
 
     [SerializeField] GameObject stageText;
     [SerializeField] GameObject waveText;
-    [SerializeField] GameObject waveMobTotalText;
+    //[SerializeField] GameObject waveMobTotalText;
     [SerializeField] GameObject lifeText;
     [SerializeField] GameObject mobCntText;
     [SerializeField] GameObject timerText;
-    [SerializeField] GameObject towerCntText;
+    //[SerializeField] GameObject towerCntText;
     [SerializeField] GameObject killCntText;
     [SerializeField] GameObject goldText;
 
     [Tooltip("캐릭터 선택 UI")]
-    [SerializeField] GameObject CharacterSelectPrefab;
+    [SerializeField] GameObject CharacterSelectPopUp;
     [Tooltip("보상 UI")]
-    [SerializeField] GameObject WaveClearPrefab;
+    [SerializeField] GameObject WaveClearPopUp;
     [Tooltip("결과 UI")]
-    [SerializeField] GameObject ResultPrefab;
+    [SerializeField] GameObject ResultPopUp;
     [Tooltip("상호작용 UI")]
-    [SerializeField] GameObject InteractionPrefeb;
+    [SerializeField] GameObject InteractionPopUp;
 
     // 받아와야할 값들
     private void Awake()
     {
         startPoint = GameObject.FindGameObjectWithTag("StartPoint");
+        startBtn = GameObject.Find("StartBtn");
+
+        // wave의 index는 현재 wave - 1
+        //allWaveInfos = startPoint.GetComponent<WaveSystem>().AllWaveInfos;
+
+        // UI 값들 초기화
+        goldText.GetComponent<TMP_Text>().text = gold.ToString();
+        lifeText.GetComponent<TMP_Text>().text = life.ToString();
+
     }
     private void Start()
     {
-        finalWave = startPoint.GetComponent<WaveSystem>().FinalWave;
+        // 이건 임의로 내가 계속 정해줘야하나? 웨이브를 스크립트로 작성하지 않는 한
+        finalWave = 2;
         enemyList = startPoint.GetComponent<EnemySpawner>().EnemyList;
     }
 
@@ -127,13 +140,14 @@ public class GM : MonoBehaviour
         // towerCntText.GetComponent<TMP_Text>().text = towerCnt.ToString();
     }
 
-    private void Update()
-    {
-        if (enemyList.Count > 0)
-        {
-            enemyNavi = enemyList[0].transform;
-        }
-    }
+    // 네비게이션용 업데이트(임시비활)
+    //private void Update()
+    //{
+    //    if (enemyList.Count > 0)
+    //    {
+    //        enemyNavi = enemyList[0].transform;
+    //    }
+    //}
 
     // 돈 관리
     public void Withdraw(int amount, bool isPlus)
@@ -146,34 +160,64 @@ public class GM : MonoBehaviour
         {
             gold -= Mathf.Abs(amount);
         }
-        // goldText.GetComponent<TMP_Text>().text = gold.ToString();
+        goldText.GetComponent<TMP_Text>().text = gold.ToString();
     }
 
     // 게임 시작
     public void GameStart()
     {
         isGameStart = true;
-        // timerText.GetComponent<TMP_Text>().text = "START";
+        startBtn.SetActive(false);
+        timerText.GetComponent<TMP_Text>().text = "yes";
         startPoint.GetComponent<WaveSystem>().StartWave();
+
     }
 
     // 몹 정보
-    public void Deposit()
+    public void MobCounter(bool isPlus, bool isKill = true)
     {
-        killCnt += 1;
-        mobCnt -= 1;
-        // killCntText.GetComponent<TMP_Text>().text = killCnt.ToString();
-        // mobCntText.GetComponent<TMP_Text>().text = mobCnt.ToString();
+        // 웨이브 끝을 판단하는 로직
+        if (isPlus)
+        {
+            mobCnt ++;
+            mobCntText.GetComponent<TMP_Text>().text = mobCnt.ToString();
+        } 
+        else
+        {
+            if (isKill)
+            {
+                killCnt ++;
+                mobCnt --;
+                killCntText.GetComponent<TMP_Text>().text = killCnt.ToString();
+                mobCntText.GetComponent<TMP_Text>().text = mobCnt.ToString();
+            }
+            else
+            {
+                mobCnt -= 1;
+                mobCntText.GetComponent<TMP_Text>().text = mobCnt.ToString();
+            }
+            if (isEndWave && mobCnt == 0)
+            {
+                Debug.Log("타이머 시작");
+                // 웨이브 클리어 함수 호출, 트리거 변수들 초기화, PopUp
+                isEndWave = false;
+
+                ClearWave();
+            }
+        }
     }
 
     // 생명력 감소
     public void LooseLife(int amount)
     {
         life -= Mathf.Abs(amount);
-
+        lifeText.GetComponent<TMP_Text>().text = life.ToString();
+        MobCounter(false, false);
         if (life <= 0)
         {
+            lifeText.GetComponent<TMP_Text>().text = 0.ToString();
             //게임오버 메소드 호출
+            GameEnd(false);
         }
     }
 
@@ -183,18 +227,20 @@ public class GM : MonoBehaviour
         while ( timer > 0)
         {
             timer -= 1;
-            // timerText.GetComponent<TMP_Text>().text = timer.ToString();
+            timerText.GetComponent<TMP_Text>().text = timer.ToString();
             yield return new WaitForSeconds(1);
         }
-        // timerText.GetComponent<TMP_Text>().text = "START";
+        wave++;
+        waveText.GetComponent<TMP_Text>().text = wave.ToString();
+        timerText.GetComponent<TMP_Text>().text = "yes";
         startPoint.GetComponent<WaveSystem>().StartWave();
     }
 
     // 타이머 시작
     private void StartTimer()
     {
-        timer = 100;
-        // timerText.GetComponent<TMP_Text>().text = timer.ToString();
+        timer = 20;
+        timerText.GetComponent<TMP_Text>().text = timer.ToString();
         StartCoroutine("Timer");
     }
 
@@ -204,8 +250,6 @@ public class GM : MonoBehaviour
         // 해당 웨이브 클리어, 보상 UI 출력, 최종웨이브 클리어시 게임셋
         if (wave < finalWave)
         {
-            wave += 1;
-            // waveText.GetComponent<TMP_Text>().text = wave.ToString();
             StartTimer();
         } else
         {
@@ -225,42 +269,5 @@ public class GM : MonoBehaviour
         {
             // failure ending
         }
-    }
-
-    // 테스트용 버튼
-    private void ClickBtn()
-    {
-        // 1 : 
-        if (Input.GetKey(KeyCode.KeypadDivide))
-        {
-            Debug.Log("/");
-        }
-
-        // 0, -, = : 씬 전환
-        if (Input.GetKey(KeyCode.Keypad0) && nowScene != "Login")
-        {
-            Debug.Log("씬전환");
-            nowScene = "Login";
-            SceneManager.LoadScene(6);
-        }
-        if (Input.GetKey(KeyCode.KeypadMinus) && nowScene != "InGame")
-        {
-            Debug.Log("씬전환");
-            nowScene = "InGame";
-            SceneManager.LoadScene(5);
-        }
-        if (Input.GetKey(KeyCode.KeypadEquals) && nowScene != "Main")
-        {
-            Debug.Log("씬전환");
-            nowScene = "Main";
-            SceneManager.LoadScene(4);
-        }
-
-        // 4 :
-        if (Input.GetKey(KeyCode.KeypadMultiply))
-        {
-            Debug.Log("*");
-        }
-
     }
 }

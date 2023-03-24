@@ -6,14 +6,13 @@ public class WaveSystem : MonoBehaviour
 {
     // 현재 스테이지의 모든 웨이브 정보
     [SerializeField] private Wave[] waves;
-    public int FinalWave { get { return waves.Length; } }
+    public Wave[] AllWaveInfos { get { return waves; } }
 
     [SerializeField] private EnemySpawner enemySpawner;
     
     // 현재 웨이브 인덱스
     private int currentWaveIndex = -1;
     // 현재 웨이브 참조
-    public int CurrentWave { get { return currentWaveIndex + 2; } }
 
     public void StartWave()
     {
