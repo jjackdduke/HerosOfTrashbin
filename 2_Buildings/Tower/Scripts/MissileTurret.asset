@@ -27,3 +27,5 @@ MonoBehaviour:
     missileUp: 50
     missileWaitSecond: 5
     missileSpeed: 100
+    hitEffect: {fileID: 7239408069682771288, guid: 61fcd8c81266bf8419e50c7a9fca0c30,
+      type: 3}

@@ -9,7 +9,7 @@ using static UnityEngine.GraphicsBuffer;
 
 public class TargetLocator : MonoBehaviour
 {
-    private Transform attackTarget = null;
+    Transform attackTarget = null;
     private float attackTargetDistance;
     public float attackRange;
 

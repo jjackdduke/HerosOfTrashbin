@@ -7,6 +7,7 @@ public class Missile : MonoBehaviour
 {
     Rigidbody rigidBody = null;
     [SerializeField] private Transform thisTarget = null;
+    Enemy targetEnemy;
     float thisDamage;
 
     [SerializeField]  private float thisMissileSpeed = 0f;
@@ -34,13 +35,14 @@ public class Missile : MonoBehaviour
         yield return new WaitForSeconds(thisMissileWaitSecond);
         fire = Aimweapon();
 
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(2f);
         Destroy(gameObject);
 
     }
 
     void Start()
     {
+        targetEnemy = thisTarget.GetComponent<Enemy>();
         rigidBody = GetComponent<Rigidbody>();
         if (thisEffect != null)
         {
@@ -54,7 +56,7 @@ public class Missile : MonoBehaviour
 
     void Update()
     {
-        if (thisTarget)
+        if (thisTarget && targetEnemy.CurrentHP > 0)
         {
             if (currentSpeed <= thisMissileSpeed)   
                 currentSpeed += thisMissileSpeed * Time.deltaTime;
@@ -113,12 +115,10 @@ public class Missile : MonoBehaviour
             if (thisDeBuff > 0)
             {
                 DeBuffAttack(enemy);
-                Instantiate(missileHitEffect, enemy.transform.position, Quaternion.identity);
             }   
             else
             {
-                enemy.ProcessHit(thisDamage);
-                Instantiate(missileHitEffect, enemy.transform.position, Quaternion.identity);
+                enemy.ProcessHit(thisDamage, missileHitEffect);
             }
         }
     }
@@ -128,7 +128,7 @@ public class Missile : MonoBehaviour
         switch (thisDeBuff)
         {
             case 1:
-                enemy.ProcessReduceSpeed(thisDamage);
+                enemy.ProcessReduceSpeed(thisDamage, missileHitEffect);
                 break;
 
             case 2:

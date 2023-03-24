@@ -20,6 +20,8 @@ public class TowerTemplate : ScriptableObject
         public bool isParticle;
         public int isDeBuff;
         public bool isZangPan;
+        public bool isLaser;
+        public float LaserRate;
         public GameObject missile;
         public float missileUp;
         public float missileWaitSecond;
