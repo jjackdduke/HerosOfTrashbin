@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class SwordPlayer : PlayerStat
 {
-    // °Ë»ç ½ºÅÈ
+    // å ì‹¯ì‚¼ì˜™ å ì™ì˜™å ì™ì˜™
     private float SwordManDamage = 10f;
     private float SwordManSpeed = 20f;
+
 
     void Start()
     {
@@ -14,9 +15,5 @@ public class SwordPlayer : PlayerStat
         playerSpeed = SwordManSpeed;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
 }

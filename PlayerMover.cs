@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine;
+using UnityEngine.Animations;
 
 public class PlayerMover : MonoBehaviour
 {
@@ -9,16 +10,17 @@ public class PlayerMover : MonoBehaviour
     //[SerializeField] GameObject laser;
 
     // 이동 속도
-    [SerializeField] float moveSpeed;
-    public float jumpPower = 30;
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float jumpPower;
 
-
+    
     // 회전 속도
     //[SerializeField] float rotateSpeed = 10.0f;
 
     Animator anim;
     Rigidbody rigid;
-    PlayerStat playerStat;
+    SwordPlayer swordPlayerStat;
+
 
     float h, v;
 
@@ -29,10 +31,11 @@ public class PlayerMover : MonoBehaviour
     bool isSkillReady = true;
     bool skillDown;
     bool isBorder;
-    bool isRun;
+    bool shiftPressed;
     bool jDown;
 
     bool isJump;
+    bool isRun;
 
     Weapon equipWeapon;
 
@@ -41,15 +44,16 @@ public class PlayerMover : MonoBehaviour
 
     float fireDelay;
     float skillDelay = 10f;
-    public float skillCoolTime = 7f;
+    public float skillCoolTime = 3f;
 
-    void Awake()
+    void Start()
     {
         
         anim = GetComponent<Animator>();
         equipWeapon = GetComponentInChildren<Weapon>();
         rigid = GetComponent<Rigidbody>();
-        playerStat = GetComponent<PlayerStat>();
+        swordPlayerStat = GetComponent<SwordPlayer>();
+        jumpPower = 20f;
 
     }
 
@@ -79,11 +83,12 @@ public class PlayerMover : MonoBehaviour
     {
         v = Input.GetAxis("Vertical"); // 앞 뒤 움직임
         h = Input.GetAxis("Horizontal"); // 좌 우 회전
+        shiftPressed = Input.GetKey(KeyCode.LeftShift);
         iDown = Input.GetButtonDown("Interaction");
         fDown = Input.GetButtonDown("Fire1");
         jDown = Input.GetButtonDown("Jump");
         skillDown = Input.GetButtonDown("Fire2");
-        isRun = Input.GetKey(KeyCode.LeftShift);
+        
     }
 
     void FreezeRotation()
@@ -101,7 +106,7 @@ public class PlayerMover : MonoBehaviour
 
     void Attack()
     {
-        if (equipWeapon == null)
+        if (equipWeapon == null || isRun)
             return;
 
         //fireDelay += Time.deltaTime;
@@ -112,33 +117,39 @@ public class PlayerMover : MonoBehaviour
 
         if (fDown)
         {
-
-            equipWeapon.Use();
-            anim.SetBool("IsSwing", true);
+            
             anim.SetTrigger("sword_combo");
-
-
-
-
+            equipWeapon.Use();
+            
             //fireDelay = 0;
         }
 
         if (skillDown && isSkillReady && !fDown)
         {
-            equipWeapon.UseSkill();
             anim.SetTrigger("Whirlwind");
+            anim.SetBool("IsWhirlwind", true);
+            equipWeapon.UseSkill();
             skillDelay = 0;
         }
 
-        anim.SetBool("IsSwing", false);
+        
 
     }
 
     void Move()
     {
+        
         if (fDown) return;
+        if (anim.GetCurrentAnimatorStateInfo(0).IsName("Combo1") 
+            || anim.GetCurrentAnimatorStateInfo(0).IsName("Combo2")
+            || anim.GetCurrentAnimatorStateInfo(0).IsName("Combo3"))
+        {
 
-        moveSpeed = playerStat.CurrentSpeed;
+            return;
+        }
+
+
+        moveSpeed = swordPlayerStat.CurrentSpeed;
         float local_moveSpeed = moveSpeed;
 
         moveVec = new Vector3(h, 0, v);
@@ -150,21 +161,23 @@ public class PlayerMover : MonoBehaviour
         if (fDown)
             moveVec = Vector3.zero;
 
-        if (isRun)
+        if (shiftPressed)
+        {
             local_moveSpeed = local_moveSpeed * 4.0f;
+            isRun = true;
+        }
+        else
+        {
+            isRun = false;
+        }
+        
 
-        if(!isBorder)
+        if (!isBorder)
             transform.position += moveVec * local_moveSpeed * Time.deltaTime;
 
-
-
-
-
+        
         anim.SetBool("IsMove", moveVec != Vector3.zero);
-
-
-
-
+        anim.SetBool("IsRun", isRun);
     }
 
     void Rotate()
@@ -178,7 +191,12 @@ public class PlayerMover : MonoBehaviour
     {
         if (jDown && !isJump)
         {
+            
             rigid.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+            anim.SetBool("isJump", true);
+            //anim.SetTrigger("IsJump");
+            
+            
             isJump = true;
         }
     }
@@ -186,8 +204,13 @@ public class PlayerMover : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject.tag == "Floor")
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Terrain"))
         {
+            
+            //anim.SetTrigger("IsLand");
+            anim.SetBool("isJump", false);
+            
+            
             isJump = false;
         }
     }

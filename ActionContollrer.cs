@@ -7,14 +7,14 @@ using TMPro;
 public class ActionContollrer : MonoBehaviour
 {
     [SerializeField]
-    private float range; //½Àµæ °¡´ÉÇÑ ÃÖ´ë °Å¸®.
+    private float range; //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½Å¸ï¿½.
 
-    private bool pickupActivated = false; // ½Àµæ °¡´ÉÇÒ ½Ã true
+    private bool pickupActivated = false; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ true
 
-    //private RaycastHit hitInfo; // Ãæµ¹Ã¼ Á¤º¸ ÀúÀå
+    //private RaycastHit hitInfo; // ï¿½æµ¹Ã¼ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
     [SerializeField]
-    private LayerMask layerMask; // ¾ÆÀÌÅÛ ·¹ÀÌ¾î¿¡¸¸ ¹ÝÀÀÇØ¾ß ÇÑ´Ù.
+    private LayerMask layerMask; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¾î¿¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¾ï¿½ ï¿½Ñ´ï¿½.
 
     [SerializeField]
     private TextMeshProUGUI actionText;
@@ -41,7 +41,7 @@ public class ActionContollrer : MonoBehaviour
             if (other.transform != null)
             {
                 Debug.Log(other.transform.GetComponent<ItemPickUp>()
-            .item.itemName + "È¹µæÇß½À´Ï´Ù.");
+            .item.itemName + "È¹ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ï´ï¿½.");
                 theInventory.AcquireItem(other.transform.GetComponent<ItemPickUp>().item);
                 Destroy(other.transform.gameObject);
                 InfoDisappear();
@@ -79,7 +79,7 @@ public class ActionContollrer : MonoBehaviour
         pickupActivated = true;
         actionText.gameObject.SetActive(true);
         actionText.text = other.transform.GetComponent<ItemPickUp>()
-            .item.itemName + "È¹µæ " + "<color=yellow>" + "(Z)" + "</color>";
+            .item.itemName + "È¹ï¿½ï¿½ " + "<color=yellow>" + "(Z)" + "</color>";
     }
 
     private void InfoDisappear()
