@@ -1,14 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
-using UnityEditor.PackageManager;
 using UnityEngine;
-using UnityEngine.XR;
-using static Cinemachine.CinemachineTargetGroup;
-using static UnityEditor.Experimental.GraphView.GraphView;
-using static UnityEngine.GraphicsBuffer;
 using TMPro;
-using OpenCover.Framework.Model;
+using Random = System.Random;
 
 public class TowerWeapon : MonoBehaviour
 {
@@ -39,8 +32,12 @@ public class TowerWeapon : MonoBehaviour
     float towerMissileSpeed => thisTowerTemplate.weapon[level - 1].missileSpeed;
     float towerMissileWaitSecond => thisTowerTemplate.weapon[level - 1].missileWaitSecond;
     ParticleSystem towerHitEffect => thisTowerTemplate.weapon[level - 1].hitEffect;
+    AudioClip[] towerFireSound => thisTowerTemplate.weapon[0].FireSound;
+    AudioClip[] towerHitSound => thisTowerTemplate.weapon[0].HitSound;
 
-
+    Random randomObj = new Random();
+    int randomValue;
+    AudioSource audioSource;
 
     [SerializeField]
     private TextMeshProUGUI thisActionText;
@@ -82,6 +79,7 @@ public class TowerWeapon : MonoBehaviour
 
     private void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         StartCoroutine(SearchTarget());
         if (towerIsParticle)
         {
@@ -105,7 +103,7 @@ public class TowerWeapon : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
 
-        Debug.Log("level + 1: " + level + ", childCnt : " + childCnt);
+        //Debug.Log("level + 1: " + level + ", childCnt : " + childCnt);
         
         if (level + 1 >= childCnt)
             isMaxUpgrade = true;
@@ -119,9 +117,10 @@ public class TowerWeapon : MonoBehaviour
             else
                 isGoldEnough = false;
         }
+
+        //Debug.Log(isMaxUpgrade + "  " + isGoldEnough);
         
-        
-        if (other.gameObject.tag == "Player" && !isMaxUpgrade)
+        if (other.gameObject.tag == "Player" && !isMaxUpgrade && isGoldEnough)
         {
             UpgradeInfoAppear();
 
@@ -135,6 +134,7 @@ public class TowerWeapon : MonoBehaviour
         }
         else if(other.gameObject.tag == "Player" && isMaxUpgrade)
         {
+            
             MaxUpgradeInfoAppear();
         }
         else if (other.gameObject.tag == "Player" && !isGoldEnough)
@@ -156,16 +156,9 @@ public class TowerWeapon : MonoBehaviour
         eDown = Input.GetKeyDown(KeyCode.E);
         if (attackTarget != null && attackTargetDistance < towerAttackRange)
         {
-            if ((towerIsLaser || !towerIsParticle) && !isMissile && !towerIsZangPan)
+            if (!towerIsParticle && !isMissile && !towerIsZangPan)
             {
-                if (isMissile)
-                {
-                    Fire();
-                }
-                else
-                {
-                    StartCoroutine(LaserAttack());
-                }
+                Fire();
                 StartCoroutine(MissileAttack());
             }
         }
@@ -175,7 +168,7 @@ public class TowerWeapon : MonoBehaviour
         }
     }
     
-    // Todo : ���� ���׷��̵� �� ���׷��̵� �Ұ� �޽��� ����
+    // Todo : 占쏙옙占쏙옙 占쏙옙占쌓뤄옙占싱듸옙 占쏙옙 占쏙옙占쌓뤄옙占싱듸옙 占쌀곤옙 占쌨쏙옙占쏙옙 占쏙옙占쏙옙
     private bool Upgrade()
     {
         
@@ -217,23 +210,36 @@ public class TowerWeapon : MonoBehaviour
         while (true)
         {
             enemies = FindObjectsOfType<Enemy>();
-            Transform closestTarget = null;
-            float maxDistance = Mathf.Infinity;
-
-            foreach (Enemy enemy in enemies)
+            
+            if (towerAttackRange  < 0)
             {
-                float targetDistance = Vector3.Distance(transform.position, enemy.transform.position);
-
-                if (targetDistance < maxDistance)
-                {
-                    closestTarget = enemy.transform;
-                    maxDistance = targetDistance;
-                }
+                attackTarget = gm.EnemyNavi.transform;   
             }
-            attackTarget = closestTarget;
-            attackTargetDistance = maxDistance;
+            else
+            {
+                Transform closestTarget = null;
+                float maxDistance = Mathf.Infinity;
+                    
+                foreach (Enemy enemy in enemies)
+                {
+                    float targetDistance = Vector3.Distance(transform.position, enemy.transform.position);
+
+                    if (targetDistance < maxDistance)
+                    {
+                        closestTarget = enemy.transform;
+                        maxDistance = targetDistance;
+                    }
+                }
+                attackTarget = closestTarget;
+                attackTargetDistance = maxDistance;
+
+            }
             GetComponentInChildren<TargetLocator>().SetUp(attackTarget, attackTargetDistance, towerAttackRange);
-            //GetComponentInChildren<LookAtTarget>().SetUp(attackTarget);
+            LookAtTarget aimer = GetComponentInChildren<LookAtTarget>();
+            if (aimer != null)
+            {
+                aimer.SetUp(attackTarget);
+            }
             yield return new WaitForSeconds(0.5f);
         }
     }
@@ -250,7 +256,7 @@ public class TowerWeapon : MonoBehaviour
 
     private IEnumerator LaserAttack()
     {
-        Debug.Log("����");
+        Debug.Log("占쏙옙占쏙옙");
         isMissile = false;
         yield return new WaitForSeconds(towerLaserRate);
         effect.Stop();
@@ -261,21 +267,31 @@ public class TowerWeapon : MonoBehaviour
        
         while (true)
         {
-        RaycastHit hitInfo;
-        Debug.DrawRay(Spawner.transform.position, Spawner.transform.forward, Color.red);
-        if (Physics.Raycast(Spawner.transform.position, Spawner.transform.forward, out hitInfo, towerAttackRange))
+        if (towerAttackRange < 0)
             {
-                if (hitInfo.collider.tag == "Enemy")
+                effect.Play();
+                audioSource.PlayOneShot(towerFireSound[0]);
+                gm.EnemyNavi.ProcessHit(towerDamage, towerHitEffect);
+            }
+        else
+            {
+            RaycastHit hitInfo;
+            if (Physics.Raycast(Spawner.transform.position, Spawner.transform.forward, out hitInfo, towerAttackRange))
                 {
-                    effect.Play();
-                    Enemy enemy = hitInfo.collider.GetComponent<Enemy>();
-                    if (towerIsDeBuff > 0)
+                    if (hitInfo.collider.tag == "Enemy")
                     {
-                        DeBuffAttack(enemy);
-                    }
-                    else
-                    {
-                        enemy.ProcessHit(towerDamage, towerHitEffect);
+                        effect.Play();
+                        //randomValue = randomObj.Next(0, towerFireSound.Length);
+                        audioSource.PlayOneShot(towerFireSound[0]);
+                        Enemy enemy = hitInfo.collider.GetComponent<Enemy>();
+                        if (towerIsDeBuff > 0)
+                            {
+                            DeBuffAttack(enemy);
+                        }
+                        else
+                        {
+                                enemy.ProcessHit(towerDamage, towerHitEffect);
+                        }
                     }
                 }
             }
@@ -290,8 +306,9 @@ public class TowerWeapon : MonoBehaviour
         if (attackTarget)
         {
             isMissile = true;
+            audioSource.PlayOneShot(towerFireSound[0]);
             GameObject missileClone = Instantiate(towerMissile, Spawner.transform.position, Quaternion.identity);
-            missileClone.GetComponent<Missile>().SetUp(attackTarget, towerDamage, towerMissileSpeed, towerMissileWaitSecond, towerIsDeBuff);
+            missileClone.GetComponent<Missile>().SetUp(attackTarget, towerDamage, towerMissileSpeed, towerMissileWaitSecond, towerIsDeBuff, towerHitSound[0]);
             missileClone.GetComponent<Rigidbody>().velocity = Vector3.up * towerMissileUp;
         }
         
@@ -299,7 +316,7 @@ public class TowerWeapon : MonoBehaviour
 
     private IEnumerator Laser()
     {
-        Debug.Log("���ݽ���");
+        Debug.Log("占쏙옙占쌥쏙옙占쏙옙");
         while (attackTarget && !isMissile)
         {
             isMissile = true;
@@ -366,11 +383,21 @@ public class TowerWeapon : MonoBehaviour
         switch (towerIsDeBuff)
         {
             case 1:
-                enemy.ProcessReduceSpeed(towerDamage, towerHitEffect);
+                if (!(enemy.DeBuffedSpeed))
+                {
+                    enemy.ProcessReduceSpeed(towerDamage, towerHitEffect);
+                    audioSource.PlayOneShot(towerFireSound[0]);
+                    //enemy.ProcessReduceSpeed(towerDamage, towerHitEffect, towerFireSound[0]);
+                }
                 break;
 
             case 2:
-                enemy.ProcessReduceArmor(towerDamage, towerHitEffect);
+                if (!(enemy.DeBuffedArmor))
+                {
+                    enemy.ProcessReduceArmor(towerDamage, towerHitEffect);
+                    audioSource.PlayOneShot(towerFireSound[0]);
+                    //enemy.ProcessReduceArmor(towerDamage, towerHitEffect, towerFireSound[0]);
+                }
                 break;
         }
     }
@@ -380,7 +407,7 @@ public class TowerWeapon : MonoBehaviour
     {
         upgradeActivated = true;
         thisActionText.gameObject.SetActive(true);
-        thisActionText.text = "Ÿ�� ���׷��̵� " + "<color=yellow>" + "(E)" + "</color>";
+        thisActionText.text = "타占쏙옙 占쏙옙占쌓뤄옙占싱듸옙 " + "<color=yellow>" + "(E)" + "</color>";
     }
 
     private void UpgradeInfoDisappear()
@@ -394,14 +421,14 @@ public class TowerWeapon : MonoBehaviour
     {
 
         thisActionText.gameObject.SetActive(true);
-        thisActionText.text = "�ִ� ���׷��̵� �Դϴ�." + "<color=yellow>" + "</color>";
+        thisActionText.text = "占쌍댐옙 占쏙옙占쌓뤄옙占싱듸옙 占쌉니댐옙." + "<color=yellow>" + "</color>";
     }
 
     private void NotEnoughGoldInfoAppear()
     {
 
         thisActionText.gameObject.SetActive(true);
-        thisActionText.text = "��尡 �����մϴ�." + "<color=yellow>" + "</color>";
+        thisActionText.text = "占쏙옙弱?占쏙옙占쏙옙占쌌니댐옙." + "<color=yellow>" + "</color>";
     }
 }
 

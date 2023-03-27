@@ -18,6 +18,7 @@ public class EnemySpawner : MonoBehaviour
 
     // 현재 웨이브 정보
     private Wave currentWave;
+    public Wave CurrentWave;
 
     // 현재 맵에 존재하는 모든 적의 정보
     private List<Enemy> enemyList;
@@ -25,10 +26,14 @@ public class EnemySpawner : MonoBehaviour
     // 적의 생성과 삭제는 EnemySpawner에서 하기 때문에 Set은 필요 없다.
     public List<Enemy> EnemyList => enemyList;
 
+    // GM
+    GM gm;
+
     private void Awake()
     {
         // 적 리스트 메모리 할당
         enemyList = new List<Enemy>();
+        gm = FindObjectOfType<GM>();
     }
 
     public void StartWave(Wave wave)
@@ -60,8 +65,10 @@ public class EnemySpawner : MonoBehaviour
             enemyList.Add(enemy);
             spawnEnemyCount++;
 
+            gm.MobCounter(true);
             yield return new WaitForSeconds(currentWave.spawnTime);
         }
+        gm.isEndWave = true;
         // 임시방편으로 이렇게 해놈
         // enemyList = new List<Enemy>();
     }
@@ -75,11 +82,11 @@ public class EnemySpawner : MonoBehaviour
     }
 
     // 스타트 버튼 없을때만 쓰는거
-    private void Update()
-    {
-        if (enemyList.Count == 0)
-        {
-            startt.GetComponent<WaveSystem>().StartWave();
-        }
-    }
+    //private void Update()
+    //{
+    //    if (enemyList.Count == 0)
+    //    {
+    //        startt.GetComponent<WaveSystem>().StartWave();
+    //    }
+    //}
 }

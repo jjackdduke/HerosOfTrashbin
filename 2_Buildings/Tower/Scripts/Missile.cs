@@ -15,18 +15,22 @@ public class Missile : MonoBehaviour
     float thisMissileWaitSecond = 0f;
     [SerializeField] ParticleSystem[] thisEffect = null;
     public ParticleSystem missileHitEffect;
+    AudioClip missileHitSound;
+
+    AudioSource audioSource;
 
     TargetLocator missileTurret;
     bool fire = false;
     int thisDeBuff;
 
-    public void SetUp(Transform attackTarget, float damage, float missileSpeed, float missileWaitSecond, int deBuff)
+    public void SetUp(Transform attackTarget, float damage, float missileSpeed, float missileWaitSecond, int deBuff, AudioClip hitSound)
     {
         this.thisTarget = attackTarget;
         this.thisDamage = damage;
         this.thisMissileSpeed = missileSpeed;
         this.thisMissileWaitSecond = missileWaitSecond;
         this.thisDeBuff = deBuff;
+        this.missileHitSound = hitSound;
     }
 
     IEnumerator LaunchDelay()
@@ -42,6 +46,7 @@ public class Missile : MonoBehaviour
 
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         targetEnemy = thisTarget.GetComponent<Enemy>();
         rigidBody = GetComponent<Rigidbody>();
         if (thisEffect != null)
@@ -55,7 +60,7 @@ public class Missile : MonoBehaviour
     }
 
     void Update()
-    {
+    {   
         if (thisTarget && targetEnemy.CurrentHP > 0)
         {
             if (currentSpeed <= thisMissileSpeed)   
@@ -69,21 +74,8 @@ public class Missile : MonoBehaviour
         }
         else
         {
-            Enemy[] enemies = FindObjectsOfType<Enemy>();
-            Transform closestTarget = null;
-            float maxDistance = Mathf.Infinity;
-
-            foreach (Enemy enemy in enemies)
-            {
-                float targetDistance = Vector3.Distance(transform.position, enemy.transform.position);
-
-                if (targetDistance < maxDistance)
-                {
-                    closestTarget = enemy.transform;
-                    maxDistance = targetDistance;
-                }
-            }
-            thisTarget = closestTarget;
+            Instantiate(missileHitEffect, transform.position, Quaternion.identity);
+            Destroy(gameObject);
         }
 
     }

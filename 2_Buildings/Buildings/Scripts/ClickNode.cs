@@ -1,7 +1,4 @@
-using Newtonsoft.Json.Bson;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using static TowerTemplate;
 using Random = System.Random;
@@ -9,36 +6,32 @@ using TMPro;
 
 public class ClickNode : MonoBehaviour
 {
-    // ��Ȱ��ȭ ����
+    // ?좎룞?숉솢?좎룞?숉솕 ?좎룞?쇿뜝?숈삕
     public Color StartColor;
 
-    // Ȱ��ȭ ����
+    // ?쒎뜝?숈삕???좎룞?쇿뜝?숈삕
     public Color SelectColor;
 
-    // �ش� ��ġ�� ��ġ�Ǿ��ִ��� ����
+    // ?좎뙏?먯삕 ?좎룞?숈튂?좎룞???좎룞?숈튂?좎떎?듭삕?좎뙇?먯삕?좎룞???좎룞?쇿뜝?숈삕
     [SerializeField] int isBuilt = 0;
 
-    // ��ġ�� Ÿ�������� ���ø�
-    [SerializeField] TowerTemplate TurretPrefab;
-    [SerializeField] TowerTemplate FirePrefab;
-    [SerializeField] TowerTemplate IcePrefab;
-    [SerializeField] TowerTemplate GunPrefab;
-    [SerializeField] TowerTemplate CursePrefab;
+    // ?좎룞?숈튂?좎룞????좎룞?쇿뜝?숈삕?좎룞?쇿뜝?숈삕 ?좎룞?쇿뜝?쒕챿??
+    [SerializeField]  TowerTemplate[] TowerPrefabs;
 
 
     [SerializeField]
     private TextMeshProUGUI actionText;
 
-    // �������� ����
+    // ?좎룞?쇿뜝?숈삕?좎룞?쇿뜝?숈삕 ?좎룞?쇿뜝?숈삕
     public Renderer rend;
 
-    // ������ �� ���� ����
+    // ?좎룞?쇿뜝?숈삕?좎룞???좎룞???좎룞?쇿뜝?숈삕 ?좎룞?쇿뜝?숈삕
     Random randomObj = new Random();
     int randomValue;
 
     GM gm;
 
-    // �Ǽ�������
+    // ?좎떎?쎌삕?좎룞?쇿뜝?숈삕?좎룞??
     private float buildDelay = 0.3f;
     GameObject arrow;
 
@@ -64,7 +57,7 @@ public class ClickNode : MonoBehaviour
                 BuildTower();
             }
 
-            Debug.Log("타워노드 접근");
+            Debug.Log("?????걗???臾롫젏");
         }
         
     }
@@ -129,35 +122,11 @@ public class ClickNode : MonoBehaviour
         {
             bool isSuccessful;
             
-            randomValue = randomObj.Next(1, 6);
-            //Debug.Log(randomValue);
+            randomValue = randomObj.Next(0, 6);
+            Debug.Log(randomValue);
             rend.material.color = SelectColor;
-            if (randomValue >= 5)
-            {
-                isSuccessful = CreateTower(CursePrefab, transform.position);
-                isBuilt = 5;
-            }
-            else if (randomValue == 4)
-            {
-                isSuccessful = CreateTower(GunPrefab, transform.position); 
-                isBuilt = 4;
-            }
-            else if (randomValue == 3)
-            {
-                isSuccessful = CreateTower(TurretPrefab, transform.position);
-                isBuilt = 3;
-            }
-            else if (randomValue == 2)
-            {
-                isSuccessful = CreateTower(FirePrefab, transform.position);
-                isBuilt = 2;
-            }
-            else
-            {
-                isSuccessful = CreateTower(IcePrefab, transform.position);
-                isBuilt = 1;
-            }
-
+            isSuccessful = CreateTower(TowerPrefabs[randomValue], transform.position);
+            isBuilt = randomValue;
             BuildInfoDisappear();
         }
     }
@@ -167,7 +136,7 @@ public class ClickNode : MonoBehaviour
     {
         buildActivated = true;
         actionText.gameObject.SetActive(true);
-        actionText.text =  "타워 건설 " + "<color=yellow>" + "(E)" + "</color>";
+        actionText.text =  "????椰꾨똻苑?" + "<color=yellow>" + "(E)" + "</color>";
     }
 
     private void BuildInfoDisappear()

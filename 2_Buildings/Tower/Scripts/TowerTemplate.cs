@@ -27,5 +27,7 @@ public class TowerTemplate : ScriptableObject
         public float missileWaitSecond;
         public float missileSpeed;
         public ParticleSystem hitEffect;
+        public AudioClip[] FireSound;
+        public AudioClip[] HitSound;
     }
 }
