@@ -12,7 +12,18 @@ public class Weapon : MonoBehaviour
     public float rate;
     public BoxCollider meleeArea;
     public TrailRenderer trailEffect;
- 
+    Animator anim;
+    Animator anim2;
+    GameObject bow;
+    
+
+    private void Awake()
+    {
+        anim = GetComponentInParent<Animator>();
+        bow = GameObject.Find("Bows");
+        anim2 = bow.GetComponent<Animator>();
+        Debug.Log(bow);
+    }
 
 
 
@@ -23,6 +34,11 @@ public class Weapon : MonoBehaviour
             StopCoroutine("Whirlwind");
             StartCoroutine("Swing");
         }
+
+        if(type == Type.Range)
+        {
+            StartCoroutine("Shoot");
+        }
             
     }
 
@@ -32,25 +48,26 @@ public class Weapon : MonoBehaviour
         {
             StopCoroutine("Swing");
             StartCoroutine("Whirlwind");
+            anim.SetBool("IsWhirlwind", false);
 
         }
     }
 
-    // Use() ¸ÞÀÎ·çÆ¾ -> Swing() ¼­ºê·çÆ¾ -> Use() ¸ÞÀÎ·çÆ¾
-    // Use() ¸ÞÀÎ·çÆ¾ + Swing() ÄÚ·çÆ¾
+    // Use() ï¿½ï¿½ï¿½Î·ï¿½Æ¾ -> Swing() ï¿½ï¿½ï¿½ï¿½ï¿½Æ¾ -> Use() ï¿½ï¿½ï¿½Î·ï¿½Æ¾
+    // Use() ï¿½ï¿½ï¿½Î·ï¿½Æ¾ + Swing() ï¿½Ú·ï¿½Æ¾
     IEnumerator Swing()
     {
-        // yield Å°¿öµå¸¦ ¿©·¯ °³ »ç¿ëÇÏ¿© ½Ã°£Â÷ ·ÎÁ÷ ÀÛ¼º °¡´É
+        // yield Å°ï¿½ï¿½ï¿½å¸¦ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Û¼ï¿½ ï¿½ï¿½ï¿½ï¿½
         //1
-        yield return new WaitForSeconds(0.1f); // 0.1 ÃÊ ´ë±â
+        yield return new WaitForSeconds(0.1f); // 0.1 ï¿½ï¿½ ï¿½ï¿½ï¿½
         meleeArea.enabled = true;
         trailEffect.enabled = true;
 
         //2
-        yield return new WaitForSeconds(0.7f); 
+        yield return new WaitForSeconds(0.2f); 
         meleeArea.enabled = false;
         //3  
-        yield return new WaitForSeconds(0.1f);  
+        yield return new WaitForSeconds(0.05f);  
         trailEffect.enabled = false;
 
     }
@@ -59,7 +76,7 @@ public class Weapon : MonoBehaviour
 
     IEnumerator Whirlwind()
     {
-        // yield Å°¿öµå¸¦ ¿©·¯ °³ »ç¿ëÇÏ¿© ½Ã°£Â÷ ·ÎÁ÷ ÀÛ¼º °¡´É
+        // yield Å°ï¿½ï¿½ï¿½å¸¦ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Û¼ï¿½ ï¿½ï¿½ï¿½ï¿½
         //1
         
         meleeArea.enabled = true;
@@ -72,7 +89,23 @@ public class Weapon : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         trailEffect.enabled = false;
         
+
+    }
+
+    IEnumerator Shoot()
+    {
+        anim.SetBool("IsFire", true);
+        anim2.SetBool("IsFire", true);
+        yield return new WaitForSeconds(0.2f); // 0.1 ï¿½ï¿½ ï¿½ï¿½ï¿½
         
+
+        trailEffect.enabled = true;
+
+        anim.SetBool("IsFire", false);
+        anim2.SetBool("IsFire", false);
+        yield return new WaitForSeconds(0.5f); // 0.1 ï¿½ï¿½ ï¿½ï¿½ï¿½
+        trailEffect.enabled = false;
+
     }
 
 
