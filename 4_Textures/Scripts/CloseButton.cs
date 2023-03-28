@@ -9,13 +9,13 @@ public class CloseButton : MonoBehaviour
     [SerializeField] private GameObject popUp;
     public HandlePopUps handlePopUps;
 
-    private void Start()
+    public void Start()
     {
         handlePopUps = FindObjectOfType<HandlePopUps>();
         GetComponent<Button>().onClick.AddListener(Close);
     }
 
-    private void Close()
+    public void Close()
     {
         handlePopUps.ClosePopUp(popUp);
     }
