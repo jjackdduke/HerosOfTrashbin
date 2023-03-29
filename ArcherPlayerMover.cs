@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine;
-using UnityEngine.Animations;
 
 public class ArcherPlayerMover : MonoBehaviour
 {
@@ -12,6 +11,7 @@ public class ArcherPlayerMover : MonoBehaviour
     // 이동 속도
     [SerializeField] private float moveSpeed;
     [SerializeField] private float jumpPower;
+   
 
     
     // 회전 속도
@@ -20,7 +20,6 @@ public class ArcherPlayerMover : MonoBehaviour
     Animator anim;
     Rigidbody rigid;
     ArcherPlayer archerPlayerStat;
-
 
     float h, v;
 
@@ -111,8 +110,13 @@ public class ArcherPlayerMover : MonoBehaviour
         {
 
             anim.SetBool("IsFire", true);
-            equipWeapon.Use();
+            if(equipWeapon.type == Weapon.Type.Range)
+            {
+                equipWeapon.Use();
+            }
             
+
+
             fireDelay = 0;
         }
 
@@ -131,13 +135,13 @@ public class ArcherPlayerMover : MonoBehaviour
     void Move()
     {
         
-        if (fDown) return;
+        //if (fDown) return;
         //if (anim.GetCurrentAnimatorStateInfo(0).IsName("ArrowFIre"))
         //{
         //    return;
         //}
 
-        anim.SetBool("IsFire", false);
+        //anim.SetBool("IsFire", false);
 
         moveSpeed = archerPlayerStat.CurrentSpeed;
         float local_moveSpeed = moveSpeed;
@@ -165,7 +169,6 @@ public class ArcherPlayerMover : MonoBehaviour
         if (!isBorder)
             transform.position += moveVec * local_moveSpeed * Time.deltaTime;
 
-        
         anim.SetBool("IsMove", moveVec != Vector3.zero);
         anim.SetBool("IsRun", isRun);
     }
@@ -207,6 +210,17 @@ public class ArcherPlayerMover : MonoBehaviour
         }
     }
 
+    public void ArrowFire()
+    {
+        equipWeapon.fireAnimation();
+    }
 
+    public void AnimEvent_FireEnd()
+    {
+        anim.SetBool("IsFire", false);
+        equipWeapon.fireEndAnimation();
+    }
+
+   
 
 }

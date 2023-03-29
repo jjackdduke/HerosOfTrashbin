@@ -12,17 +12,28 @@ public class Weapon : MonoBehaviour
     public float rate;
     public BoxCollider meleeArea;
     public TrailRenderer trailEffect;
-    Animator anim;
-    Animator anim2;
+    Animator anim; // Melee 일 경우: 검, Range일 경우: 화살
+    Animator anim2;// Range일 경우: 활
     GameObject bow;
-    
+    GameObject arrows;
+    public ParticleSystem hitEffect;
+    public Transform arrowPos;
+    public GameObject arrow;
+
 
     private void Awake()
     {
-        anim = GetComponentInParent<Animator>();
-        bow = GameObject.Find("Bows");
-        anim2 = bow.GetComponent<Animator>();
-        Debug.Log(bow);
+        if(type == Type.Range)
+        {
+            arrows = GameObject.Find("Arrows");
+            anim = arrows.GetComponent<Animator>();
+            bow = GameObject.Find("Bows");
+            anim2 = bow.GetComponent<Animator>();
+        }else if(type == Type.Melee)
+        {
+            anim = GetComponentInParent<Animator>();
+        }
+        
     }
 
 
@@ -31,13 +42,11 @@ public class Weapon : MonoBehaviour
     {
         if (type == Type.Melee)
         {
-            StopCoroutine("Whirlwind");
-            StartCoroutine("Swing");
         }
 
         if(type == Type.Range)
         {
-            StartCoroutine("Shoot");
+            StartCoroutine("Shot");
         }
             
     }
@@ -46,68 +55,70 @@ public class Weapon : MonoBehaviour
     {
         if(type == Type.Melee)
         {
-            StopCoroutine("Swing");
-            StartCoroutine("Whirlwind");
-            anim.SetBool("IsWhirlwind", false);
-
+            anim.SetBool("IsWhirlwind", true);
         }
     }
 
     // Use() ���η�ƾ -> Swing() �����ƾ -> Use() ���η�ƾ
     // Use() ���η�ƾ + Swing() �ڷ�ƾ
-    IEnumerator Swing()
-    {
-        // yield Ű���带 ���� �� ����Ͽ� �ð��� ���� �ۼ� ����
-        //1
-        yield return new WaitForSeconds(0.1f); // 0.1 �� ���
-        meleeArea.enabled = true;
-        trailEffect.enabled = true;
 
-        //2
-        yield return new WaitForSeconds(0.2f); 
-        meleeArea.enabled = false;
-        //3  
-        yield return new WaitForSeconds(0.05f);  
-        trailEffect.enabled = false;
+    IEnumerator Shot()
+    {
+
+        //#1 총알 발사
+        GameObject instantArrow = Instantiate(arrow, arrowPos.position, arrowPos.rotation);
+        Rigidbody arrowRigid = instantArrow.GetComponent<Rigidbody>();
+        arrowRigid.velocity = arrowPos.forward * 50;
+        yield return new WaitForSeconds(3f);
+
+        Destroy(instantArrow);
 
     }
 
 
-
-    IEnumerator Whirlwind()
+    // 궁수 애니메이션
+    public void fireAnimation()
     {
-        // yield Ű���带 ���� �� ����Ͽ� �ð��� ���� �ۼ� ����
-        //1
-        
-        meleeArea.enabled = true;
-        trailEffect.enabled = true;
-        yield return new WaitForSeconds(3.8f);
 
-
-        meleeArea.enabled = false;
-
-        yield return new WaitForSeconds(0.1f);
-        trailEffect.enabled = false;
-        
-
-    }
-
-    IEnumerator Shoot()
-    {
         anim.SetBool("IsFire", true);
         anim2.SetBool("IsFire", true);
-        yield return new WaitForSeconds(0.2f); // 0.1 �� ���
-        
+    }
 
-        trailEffect.enabled = true;
-
+    public void fireEndAnimation()
+    {
         anim.SetBool("IsFire", false);
         anim2.SetBool("IsFire", false);
-        yield return new WaitForSeconds(0.5f); // 0.1 �� ���
-        trailEffect.enabled = false;
+    }
+
+
+    // 소드맨 애니메이션
+    public void SwingAnimation()
+    {
+        meleeArea.enabled = true;
+        trailEffect.enabled = true;
 
     }
 
+    public void SwingEndAnimation()
+    {
+        anim.SetBool("IsFire", false);
+        anim2.SetBool("IsFire", false);
+        meleeArea.enabled = false;
+        trailEffect.enabled = false;
+    }
+
+    public void WhirlwindAnimation()
+    {
+        meleeArea.enabled = true;
+        trailEffect.enabled = true;
+    }
+
+    public void WhirlwindEndAnimation()
+    {
+        meleeArea.enabled = false;
+        trailEffect.enabled = false;
+        anim.SetBool("IsWhirlwind", false);
+    }
 
 
 

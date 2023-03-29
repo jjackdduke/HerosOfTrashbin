@@ -57,7 +57,10 @@ public class SwordPlayerMover : MonoBehaviour
 
     void Update()
     {
-
+        if (anim.GetCurrentAnimatorStateInfo(0).IsName("Idle"))
+        {
+            anim.ResetTrigger("sword_combo");
+        }
 
         GetInput();
 
@@ -116,7 +119,7 @@ public class SwordPlayerMover : MonoBehaviour
         {
             
             anim.SetTrigger("sword_combo");
-            equipWeapon.Use();
+            //equipWeapon.Use();
             
             //fireDelay = 0;
         }
@@ -124,8 +127,8 @@ public class SwordPlayerMover : MonoBehaviour
         if (skillDown && isSkillReady && !fDown)
         {
             anim.SetTrigger("Whirlwind");
-            anim.SetBool("IsWhirlwind", true);
-            equipWeapon.UseSkill();
+            //anim.SetBool("IsWhirlwind", true);
+            //equipWeapon.UseSkill();
             skillDelay = 0;
         }
 
@@ -208,5 +211,24 @@ public class SwordPlayerMover : MonoBehaviour
     }
 
 
+    public void Swing1_Start()
+    {
+        equipWeapon.SwingAnimation();
+    }
+
+    public void Swing1_End()
+    {
+        equipWeapon.SwingEndAnimation();
+    }
+
+    public void Whirlwind_Start()
+    {
+        equipWeapon.WhirlwindAnimation();
+    }
+
+    public void Reset_State()
+    {
+        equipWeapon.WhirlwindEndAnimation();
+    }
 
 }
