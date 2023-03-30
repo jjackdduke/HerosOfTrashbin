@@ -18,7 +18,7 @@ public class EnemySpawner : MonoBehaviour
 
     // 현재 웨이브 정보
     private Wave currentWave;
-    public Wave CurrentWave;
+    public Wave CurrentWave { get { return currentWave; } }
 
     // 현재 맵에 존재하는 모든 적의 정보
     private List<Enemy> enemyList;
@@ -28,6 +28,9 @@ public class EnemySpawner : MonoBehaviour
 
     // GM
     GM gm;
+
+    // 적 생성 시 파티클
+    [SerializeField] ParticleSystem SpawnEffect;
 
     private void Awake()
     {
@@ -64,6 +67,7 @@ public class EnemySpawner : MonoBehaviour
 
             enemyList.Add(enemy);
             spawnEnemyCount++;
+            Instantiate(SpawnEffect, clone.transform.position, Quaternion.identity);
 
             gm.MobCounter(true);
             yield return new WaitForSeconds(currentWave.spawnTime);

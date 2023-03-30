@@ -16,7 +16,8 @@ public class ClickNode : MonoBehaviour
     [SerializeField] int isBuilt = 0;
 
     // ?좎룞?숈튂?좎룞????좎룞?쇿뜝?숈삕?좎룞?쇿뜝?숈삕 ?좎룞?쇿뜝?쒕챿??
-    [SerializeField]  TowerTemplate[] TowerPrefabs;
+    [SerializeField] BuildingTemplate Building;
+    [SerializeField] TowerTemplate[] TowerPrefabs;
 
 
     [SerializeField]
@@ -41,6 +42,7 @@ public class ClickNode : MonoBehaviour
     {
         gm = FindObjectOfType<GM>();
         rend = GetComponent<Renderer>();
+        actionText = GameObject.Find("ShowText").gameObject.GetComponentInChildren<TextMeshProUGUI>();
         rend.material.color = StartColor;
         arrow = transform.GetChild(2).gameObject;
     }
@@ -54,7 +56,9 @@ public class ClickNode : MonoBehaviour
 
             if (Input.GetKey(KeyCode.E))
             {
+                Debug.Log("E clicked");
                 BuildTower();
+                Debug.Log("tower Builded");
             }
 
             Debug.Log("?????걗???臾롫젏");
@@ -73,16 +77,19 @@ public class ClickNode : MonoBehaviour
 
         if (gm == null)
         {
+            Debug.Log("GM 이 없습니다");
             return false;
         }
-        if (gm.TowerCnt > 0)
+        if (gm.TowerCnt > 0) // Tower갯수가 있을때
             {
+
             GameObject towerClone = Instantiate(projectilePrefab, position, Quaternion.identity);
-            gm.BuildTower();
+            Debug.Log("towerClone : " + towerClone);
+            gm.BuildTower(); // 타워개수 -1
             StartCoroutine(Build());
             // cost += inflation;
 
-            towerClone.GetComponent<TowerWeapon>().SetUp(towerTemplate, actionText);
+            towerClone.GetComponent<TowerWeapon>().SetUp(towerTemplate, actionText, Building);
             gameObject.SetActive(false);
 
             return true;
@@ -121,7 +128,6 @@ public class ClickNode : MonoBehaviour
         if (isBuilt == 0 && buildActivated)
         {
             bool isSuccessful;
-            
             randomValue = randomObj.Next(0, 6);
             Debug.Log(randomValue);
             rend.material.color = SelectColor;
@@ -136,7 +142,7 @@ public class ClickNode : MonoBehaviour
     {
         buildActivated = true;
         actionText.gameObject.SetActive(true);
-        actionText.text =  "????椰꾨똻苑?" + "<color=yellow>" + "(E)" + "</color>";
+        actionText.text =  "Build Tower" + "<color=yellow>" + "(E)" + "</color>";
     }
 
     private void BuildInfoDisappear()

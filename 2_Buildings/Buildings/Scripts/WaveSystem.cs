@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class WaveSystem : MonoBehaviour
@@ -9,7 +7,8 @@ public class WaveSystem : MonoBehaviour
     public Wave[] AllWaveInfos { get { return waves; } }
 
     [SerializeField] private EnemySpawner enemySpawner;
-    
+    [SerializeField] private Invest invest;
+
     // 현재 웨이브 인덱스
     private int currentWaveIndex = -1;
     // 현재 웨이브 참조
@@ -23,6 +22,8 @@ public class WaveSystem : MonoBehaviour
             currentWaveIndex++;
             // EnemySpawner의 Startwave() 함수 호출, 현재 웨이브 정보 제공
             enemySpawner.StartWave(waves[currentWaveIndex]);
+            invest.ThisWave(currentWaveIndex);
+
         }
     }
 }

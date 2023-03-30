@@ -20,7 +20,7 @@ MonoBehaviour:
     Damage: 0.2
     rate: 0
     range: 30
-    cost: 15
+    cost: 150
     isParticle: 0
     isDeBuff: 2
     isZangPan: 2
@@ -30,7 +30,7 @@ MonoBehaviour:
     missileUp: 0
     missileWaitSecond: 0
     missileSpeed: 0
-    hitEffect: {fileID: 2211445073731190313, guid: 70e92870c94a46b42b9dea61e755b4fe,
+    hitEffect: {fileID: 198681264470032530, guid: b10f9989e1400dc4e93bd99fa20178c2,
       type: 3}
     FireSound:
     - {fileID: 8300000, guid: 6e4417d85d1160e499fdeff792348652, type: 3}
@@ -38,8 +38,8 @@ MonoBehaviour:
   - Prefab: {fileID: 0}
     Damage: 0.4
     rate: 0
-    range: 40
-    cost: 25
+    range: 50
+    cost: 350
     isParticle: 0
     isDeBuff: 2
     isZangPan: 2
@@ -49,15 +49,15 @@ MonoBehaviour:
     missileUp: 0
     missileWaitSecond: 0
     missileSpeed: 0
-    hitEffect: {fileID: 2211445073731190313, guid: 70e92870c94a46b42b9dea61e755b4fe,
+    hitEffect: {fileID: 3781946149995631009, guid: 2af047a8f7a8e2d43bc4a318c8df7528,
       type: 3}
     FireSound: []
     HitSound: []
   - Prefab: {fileID: 0}
     Damage: 0.6
     rate: 0
-    range: 50
-    cost: 35
+    range: 70
+    cost: 750
     isParticle: 0
     isDeBuff: 2
     isZangPan: 2
@@ -67,7 +67,7 @@ MonoBehaviour:
     missileUp: 0
     missileWaitSecond: 0
     missileSpeed: 0
-    hitEffect: {fileID: 2211445073731190313, guid: 70e92870c94a46b42b9dea61e755b4fe,
+    hitEffect: {fileID: 3781946149995631009, guid: 2af047a8f7a8e2d43bc4a318c8df7528,
       type: 3}
     FireSound: []
     HitSound: []

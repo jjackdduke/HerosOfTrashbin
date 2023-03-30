@@ -13,7 +13,8 @@ public class TowerWeapon : MonoBehaviour
     Enemy[] enemies;
     float attackTargetDistance;
     bool isMissile = false;
-    bool eDown; 
+    bool eDown;
+    
 
     GameObject Spawner;
     [SerializeField] private TowerTemplate thisTowerTemplate;
@@ -31,10 +32,16 @@ public class TowerWeapon : MonoBehaviour
     float towerMissileUp => thisTowerTemplate.weapon[level - 1].missileUp;
     float towerMissileSpeed => thisTowerTemplate.weapon[level - 1].missileSpeed;
     float towerMissileWaitSecond => thisTowerTemplate.weapon[level - 1].missileWaitSecond;
-    ParticleSystem towerHitEffect => thisTowerTemplate.weapon[level - 1].hitEffect;
+    ParticleSystem towerHitEffect => thisTowerTemplate.weapon[0].hitEffect;
     AudioClip[] towerFireSound => thisTowerTemplate.weapon[0].FireSound;
     AudioClip[] towerHitSound => thisTowerTemplate.weapon[0].HitSound;
 
+    BuildingTemplate CommonBuild;
+    AudioClip DoneBuildSound => CommonBuild.doneBuildSound;
+    AudioClip DoneUpgradeSound => CommonBuild.doneUpgradeSound;
+    ParticleSystem DoneBuild => CommonBuild.doneBuild;
+    ParticleSystem DoneUpgrade => CommonBuild.doneUpgrade;
+    
     Random randomObj = new Random();
     int randomValue;
     AudioSource audioSource;
@@ -45,10 +52,11 @@ public class TowerWeapon : MonoBehaviour
     bool upgradeActivated;
     bool isMaxUpgrade;
     bool isGoldEnough;
-    public void SetUp(TowerTemplate towerTemplate, TextMeshProUGUI actionText)
+    public void SetUp(TowerTemplate towerTemplate, TextMeshProUGUI actionText, BuildingTemplate commonBuild)
     {
         this.thisTowerTemplate = towerTemplate;
         this.thisActionText = actionText;
+        this.CommonBuild = commonBuild;
     }
     
     public void SetUp2(TowerTemplate towerTemplate)
@@ -80,6 +88,7 @@ public class TowerWeapon : MonoBehaviour
     private void Start()
     {
         audioSource = GetComponent<AudioSource>();
+        Instantiate(DoneBuild, transform.position, Quaternion.identity);
         StartCoroutine(SearchTarget());
         if (towerIsParticle)
         {
@@ -179,7 +188,8 @@ public class TowerWeapon : MonoBehaviour
             transform.GetChild(level).gameObject.SetActive(true);
             gm.Withdraw(thisTowerTemplate.weapon[level - 1].cost, false);
             SpecialTower();
-            
+            Instantiate(DoneUpgrade, transform.position, Quaternion.identity);
+
             return true;
         }
         else
@@ -211,7 +221,7 @@ public class TowerWeapon : MonoBehaviour
         {
             enemies = FindObjectsOfType<Enemy>();
             
-            if (towerAttackRange  < 0)
+            if (towerAttackRange  < 0 && gm.EnemyNavi != null)
             {
                 attackTarget = gm.EnemyNavi.transform;   
             }
@@ -256,7 +266,7 @@ public class TowerWeapon : MonoBehaviour
 
     private IEnumerator LaserAttack()
     {
-        Debug.Log("占쏙옙占쏙옙");
+
         isMissile = false;
         yield return new WaitForSeconds(towerLaserRate);
         effect.Stop();
@@ -267,8 +277,9 @@ public class TowerWeapon : MonoBehaviour
        
         while (true)
         {
-        if (towerAttackRange < 0)
+        if (towerAttackRange < 0 && gm.EnemyNavi != null)
             {
+                Vector3 hitinfo = gm.EnemyNavi.transform.position;
                 effect.Play();
                 audioSource.PlayOneShot(towerFireSound[0]);
                 gm.EnemyNavi.ProcessHit(towerDamage, towerHitEffect);
@@ -316,7 +327,7 @@ public class TowerWeapon : MonoBehaviour
 
     private IEnumerator Laser()
     {
-        Debug.Log("占쏙옙占쌥쏙옙占쏙옙");
+
         while (attackTarget && !isMissile)
         {
             isMissile = true;
@@ -407,7 +418,7 @@ public class TowerWeapon : MonoBehaviour
     {
         upgradeActivated = true;
         thisActionText.gameObject.SetActive(true);
-        thisActionText.text = "타占쏙옙 占쏙옙占쌓뤄옙占싱듸옙 " + "<color=yellow>" + "(E)" + "</color>";
+        thisActionText.text = "타워 업그레이드 " + "<color=yellow>" + "(E)" + "</color>";
     }
 
     private void UpgradeInfoDisappear()
@@ -421,14 +432,14 @@ public class TowerWeapon : MonoBehaviour
     {
 
         thisActionText.gameObject.SetActive(true);
-        thisActionText.text = "占쌍댐옙 占쏙옙占쌓뤄옙占싱듸옙 占쌉니댐옙." + "<color=yellow>" + "</color>";
+        thisActionText.text = "최대 업그레이드 입니다." + "<color=yellow>" + "</color>";
     }
 
     private void NotEnoughGoldInfoAppear()
     {
 
         thisActionText.gameObject.SetActive(true);
-        thisActionText.text = "占쏙옙弱?占쏙옙占쏙옙占쌌니댐옙." + "<color=yellow>" + "</color>";
+        thisActionText.text = "골드가 부족합니다." + "<color=yellow>" + "</color>";
     }
 }
 

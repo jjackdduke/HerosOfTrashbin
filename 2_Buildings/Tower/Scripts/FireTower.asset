@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   towerPrefab: {fileID: 5994176029770567409, guid: c14b303ed1f0e284b8d5b7faddb6dbb1,
     type: 3}
+  TowerSound: {fileID: 8300000, guid: 307ee2060ebc0ba4f8c55d48a664217b, type: 3}
   weapon:
   - Prefab: {fileID: 5994176029770567409, guid: c14b303ed1f0e284b8d5b7faddb6dbb1,
       type: 3}

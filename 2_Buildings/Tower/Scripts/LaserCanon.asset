@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   towerPrefab: {fileID: 8889765800355688168, guid: 8f7a079d831a05b4b9d5080a9ea5a9a4,
     type: 3}
+  TowerSound: {fileID: 8300000, guid: 307ee2060ebc0ba4f8c55d48a664217b, type: 3}
   weapon:
   - Prefab: {fileID: 8889765800355688168, guid: 8f7a079d831a05b4b9d5080a9ea5a9a4,
       type: 3}
@@ -32,3 +33,5 @@ MonoBehaviour:
     missileSpeed: 0
     hitEffect: {fileID: 8161942417590462681, guid: e1b25a96c51a5c4409d40e8f6403b24d,
       type: 3}
+    FireSound: []
+    HitSound: []
