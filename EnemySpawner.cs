@@ -4,44 +4,47 @@ using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
-    // Àû ÇÁ¸®Æé
+    // ì  í”„ë¦¬í©
     [SerializeField] private GameObject enemyPrefab;
 
-    // ÀÓÀÇ ½ÃÀÛ¿ë wavesystem
+    // ì„ì˜ ì‹œì‘ìš© wavesystem
     [SerializeField] private GameObject startt;
     
-    // Àû Ã¼·ÂÀ» ³ªÅ¸³»´Â UIÇÁ¸®Æé
+    // ì  ì²´ë ¥ì„ ë‚˜íƒ€ë‚´ëŠ” UIí”„ë¦¬í©
     // [SerializeField] private GameObject enemyHPSliderPrefab;
 
-    // UI¸¦ Ç¥ÇöÇÏ´Â Canvas ¿ÀºêÁ§Æ®ÀÇ transform
+    // UIë¥¼ í‘œí˜„í•˜ëŠ” Canvas ì˜¤ë¸Œì íŠ¸ì˜ transform
     // [SerializeField] private Transform canvasTransform;
 
-    // ÇöÀç ¿şÀÌºê Á¤º¸
+    // í˜„ì¬ ì›¨ì´ë¸Œ ì •ë³´
     private Wave currentWave;
-    public Wave CurrentWave;
+    public Wave CurrentWave { get { return currentWave; } }
 
-    // ÇöÀç ¸Ê¿¡ Á¸ÀçÇÏ´Â ¸ğµç ÀûÀÇ Á¤º¸
+    // í˜„ì¬ ë§µì— ì¡´ì¬í•˜ëŠ” ëª¨ë“  ì ì˜ ì •ë³´
     private List<Enemy> enemyList;
 
-    // ÀûÀÇ »ı¼º°ú »èÁ¦´Â EnemySpawner¿¡¼­ ÇÏ±â ¶§¹®¿¡ SetÀº ÇÊ¿ä ¾ø´Ù.
+    // ì ì˜ ìƒì„±ê³¼ ì‚­ì œëŠ” EnemySpawnerì—ì„œ í•˜ê¸° ë•Œë¬¸ì— Setì€ í•„ìš” ì—†ë‹¤.
     public List<Enemy> EnemyList => enemyList;
 
     // GM
     GM gm;
 
+    // í”Œë ˆì´ì–´ ìˆ˜
+    private int playerCnt = 1;
+
     private void Awake()
     {
-        // Àû ¸®½ºÆ® ¸Ş¸ğ¸® ÇÒ´ç
+        // ì  ë¦¬ìŠ¤íŠ¸ ë©”ëª¨ë¦¬ í• ë‹¹
         enemyList = new List<Enemy>();
         gm = FindObjectOfType<GM>();
     }
 
     public void StartWave(Wave wave)
     {
-        // ¸Å°³º¯¼ö·Î ¹Ş¾Æ¿Â ¿şÀÌºê Á¤º¸ ÀúÀå
+        // ë§¤ê°œë³€ìˆ˜ë¡œ ë°›ì•„ì˜¨ ì›¨ì´ë¸Œ ì •ë³´ ì €ì¥
         currentWave = wave;
 
-        // ÇöÀç ¿şÀÌºê ½ÃÀÛ
+        // í˜„ì¬ ì›¨ì´ë¸Œ ì‹œì‘
         StartCoroutine("SpawnEnemy");
     }
 
@@ -51,11 +54,11 @@ public class EnemySpawner : MonoBehaviour
 
         while (spawnEnemyCount < currentWave.maxEnemyCount)
         {   
-           // ¸÷ ¹Ù²Ù·Á¸é ¿©±â¼­ ¹Ù²ãÁÖ¸é µÊ
+           // ëª¹ ë°”ê¾¸ë ¤ë©´ ì—¬ê¸°ì„œ ë°”ê¿”ì£¼ë©´ ë¨
             GameObject clone = Instantiate(currentWave.enemyPrefabs[0], transform);
             Enemy enemy = clone.GetComponent<Enemy>();
             enemy.pathString = currentWave.pathString;
-            enemy.mobHP = currentWave.mobHP;
+            enemy.mobHP = currentWave.mobHP * playerCnt;
             enemy.isBoss = currentWave.isBoss;
             if (enemy.isBoss) { enemy.transform.GetChild(0).transform.localScale *= 2f; }
             enemy.lifePenalty = currentWave.lifePenalty;
@@ -69,19 +72,22 @@ public class EnemySpawner : MonoBehaviour
             yield return new WaitForSeconds(currentWave.spawnTime);
         }
         gm.isEndWave = true;
-        // ÀÓ½Ã¹æÆíÀ¸·Î ÀÌ·¸°Ô ÇØ³ğ
+        // ì„ì‹œë°©í¸ìœ¼ë¡œ ì´ë ‡ê²Œ í•´ë†ˆ
         // enemyList = new List<Enemy>();
     }
 
-    public void DestroyEnemy(Enemy enemy)
+    public void DestroyEnemy(Enemy enemy, bool isKill = true)
     {
-        // ¸®½ºÆ®¿¡¼­ »ç¸ÁÇÏ´Â Àû Á¤º¸ »èÁ¦
+        // ë¦¬ìŠ¤íŠ¸ì—ì„œ ì‚¬ë§í•˜ëŠ” ì  ì •ë³´ ì‚­ì œ
         enemyList.Remove(enemy);
-        // Àû ¿ÀºêÁ§Æ® »èÁ¦
-        Destroy(enemy.gameObject, 0.8f);
+        // ì  ì˜¤ë¸Œì íŠ¸ ì‚­ì œ
+        if (isKill)
+        {
+            Destroy(enemy.gameObject, 0.8f);
+        }
     }
 
-    // ½ºÅ¸Æ® ¹öÆ° ¾øÀ»¶§¸¸ ¾²´Â°Å
+    // ìŠ¤íƒ€íŠ¸ ë²„íŠ¼ ì—†ì„ë•Œë§Œ ì“°ëŠ”ê±°
     //private void Update()
     //{
     //    if (enemyList.Count == 0)

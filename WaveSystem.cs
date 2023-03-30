@@ -4,30 +4,33 @@ using UnityEngine;
 
 public class WaveSystem : MonoBehaviour
 {
-    // ÇöÀç ½ºÅ×ÀÌÁöÀÇ ¸ğµç ¿şÀÌºê Á¤º¸
+    // í˜„ì¬ ìŠ¤í…Œì´ì§€ì˜ ëª¨ë“  ì›¨ì´ë¸Œ ì •ë³´
     [SerializeField] private Wave[] waves;
     public Wave[] AllWaveInfos { get { return waves; } }
 
     [SerializeField] private EnemySpawner enemySpawner;
-    
-    // ÇöÀç ¿şÀÌºê ÀÎµ¦½º
+    [SerializeField] private Invest invest;
+
+    // í˜„ì¬ ì›¨ì´ë¸Œ ì¸ë±ìŠ¤
     private int currentWaveIndex = -1;
-    // ÇöÀç ¿şÀÌºê ÂüÁ¶
+    // í˜„ì¬ ì›¨ì´ë¸Œ ì°¸ì¡°
 
     public void StartWave()
     {
-        // ÇöÀç ¸Ê¿¡ ÀûÀÌ ¾ø°í, Wave°¡ ³²¾ÆÀÖÀ¸¸é
-        if (enemySpawner.EnemyList.Count == 0 && currentWaveIndex < waves.Length - 1)
+        // í˜„ì¬ ë§µì— ì ì´ ì—†ê³ , Waveê°€ ë‚¨ì•„ìˆìœ¼ë©´
+        if (currentWaveIndex < waves.Length - 1)
         {
-            // ÀÎµ¦½ºÀÇ ½ÃÀÛÀÌ -1ÀÌ±â ¶§¹®¿¡ ¿şÀÌºê ÀÎµ¦½º Áõ°¡¸¦ Á¦ÀÏ ¸ÕÀú ÇÔ
+            // ì¸ë±ìŠ¤ì˜ ì‹œì‘ì´ -1ì´ê¸° ë•Œë¬¸ì— ì›¨ì´ë¸Œ ì¸ë±ìŠ¤ ì¦ê°€ë¥¼ ì œì¼ ë¨¼ì € í•¨
             currentWaveIndex++;
-            // EnemySpawnerÀÇ Startwave() ÇÔ¼ö È£Ãâ, ÇöÀç ¿şÀÌºê Á¤º¸ Á¦°ø
+            // EnemySpawnerì˜ Startwave() í•¨ìˆ˜ í˜¸ì¶œ, í˜„ì¬ ì›¨ì´ë¸Œ ì •ë³´ ì œê³µ
             enemySpawner.StartWave(waves[currentWaveIndex]);
+            invest.ThisWave(currentWaveIndex);
+
         }
     }
 }
 
-// ¿şÀÌºê Ä¿½ºÅÒ ½Ã½ºÅÛ
+// ì›¨ì´ë¸Œ ì»¤ìŠ¤í…€ ì‹œìŠ¤í…œ
 [System.Serializable]
 public struct Wave
 {
