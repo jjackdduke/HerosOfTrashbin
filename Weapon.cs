@@ -38,6 +38,7 @@ public class Weapon : MonoBehaviour
 
 
 
+
     public void Use()
     {
         if (type == Type.Melee)
@@ -67,9 +68,8 @@ public class Weapon : MonoBehaviour
 
         //#1 총알 발사
         GameObject instantArrow = Instantiate(arrow, arrowPos.position, arrowPos.rotation);
-        Rigidbody arrowRigid = instantArrow.GetComponent<Rigidbody>();
-        arrowRigid.velocity = arrowPos.forward * 50;
-        yield return new WaitForSeconds(3f);
+        
+        yield return new WaitForSeconds(3f); // 3초 뒤에 자동으로 파괴됨
 
         Destroy(instantArrow);
 
@@ -101,8 +101,7 @@ public class Weapon : MonoBehaviour
 
     public void SwingEndAnimation()
     {
-        anim.SetBool("IsFire", false);
-        anim2.SetBool("IsFire", false);
+        
         meleeArea.enabled = false;
         trailEffect.enabled = false;
     }

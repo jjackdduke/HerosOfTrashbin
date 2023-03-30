@@ -40,7 +40,9 @@ public class ArcherPlayerMover : MonoBehaviour
     Vector3 moveVec;
 
 
-    float fireDelay = 1f;
+    float fireDelay = 10000f; // 이 값은 큰값으로만 정하면 된다.
+                              // 공격속도는 Weapon에서 조절  
+                                
     float skillDelay = 10f;
     public float skillCoolTime = 4f;
 
@@ -108,24 +110,20 @@ public class ArcherPlayerMover : MonoBehaviour
 
         if (fDown && isFireReady)
         {
-
+            anim.SetBool("IsFire", false);
             anim.SetBool("IsFire", true);
             if(equipWeapon.type == Weapon.Type.Range)
             {
                 equipWeapon.Use();
             }
             
-
-
             fireDelay = 0;
         }
 
         if (skillDown && isSkillReady && !fDown)
         {
-            //anim.SetTrigger("Whirlwind");
-            //anim.SetBool("IsWhirlwind", true);
-            //equipWeapon.UseSkill();
-            //skillDelay = 0;
+            anim.SetTrigger("MultiShot");
+            skillDelay = 0;
         }
 
         
@@ -134,12 +132,12 @@ public class ArcherPlayerMover : MonoBehaviour
 
     void Move()
     {
-        
-        //if (fDown) return;
-        //if (anim.GetCurrentAnimatorStateInfo(0).IsName("ArrowFIre"))
-        //{
-        //    return;
-        //}
+
+        if (fDown) return;
+        if (anim.GetCurrentAnimatorStateInfo(0).IsName("MultiShot"))
+        {
+            return;
+        }
 
         //anim.SetBool("IsFire", false);
 
