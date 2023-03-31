@@ -4,6 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using JetBrains.Annotations;
+using static ItemController;
+using UnityEditor.EditorTools;
+using Unity.VisualScripting;
 
 public class GM : MonoBehaviour
 {
@@ -35,57 +39,82 @@ public class GM : MonoBehaviour
         - 그 외 인게임 결과값들..(생각해보기)
     */
 
-    // 기타 변수
-    public bool isEndWave = false;
+    /*  
+    * [1] 변수 설정
+    *
+    */
 
-    // 1. 씬정보
-    private string nowScene = "InGame";
+    // 기타 변수 및 개발중
+    public bool isEndWave = false;  
 
-    // 2. 팝업 여부(1개라도 띄워져 있으면 게임 화면은 모든 마우스, 키보드 입력 비활성화)
-    private bool isPopup = false;
+    private string nowScene = "InGame";  // [1-1] 씬정보
 
-    // 3. 기지에서 가장 가까운 적의 위치(젤앞적transform.position)
-    private List<Enemy> enemyList;
-    private Transform enemyNavi;
+    private bool isPopup = false; // [1-2] 팝업 여부(1개라도 띄워져 있으면 게임 화면은 모든 마우스, 키보드 입력 비활성화)
 
-    // 4. 방장의 게임 시작 여부
-    private bool isGameStart = false;
+    private List<Enemy> enemyList; // [1-3] 기지에서 가장 가까운 적의 위치(젤앞적transform.position)
+    private Enemy enemyNavi;
+    public Enemy EnemyNavi { get { return enemyNavi; } }
+   
+    private bool isGameStart = false;   // [1-4] 방장의 게임 시작 여부
+    
+    private Transform myTowerNavi;  // [1-5] 내가 설치한 포탑의 위치
 
-    // 5. 내가 설치한 포탑의 위치
-    private Transform myTowerNavi;
+    // [1-6] 상대의 위치, 나와 다른 사람이 설치한 포탑의 위치?, 능력치, 골드 등(추가)
 
-    // 6. 상대의 위치, 나와 다른 사람이 설치한 포탑의 위치?, 능력치, 골드 등(추가)
+    // [1-7] 알림창 코멘트(이거 억덕하지 좀 빡세네)
 
-    // 7. 알림창 코멘트(이거 억덕하지 좀 빡세네)
 
-    // 계정 정보
-    private int userExp = 1;
-    private int userLv = 1;
 
-    // 유저 정보
+    /*  
+     * [2] 디폴트 설정 
+     *
+     */
+
+    // [2-1] 계정 정보
+    public int userExp = 1;
+    public int userLv = 0;
+    
     private string playerName = "TEST";
     private int characterIdx = 0;
-    //default gold is 0
-    private int gold = 100;
-    public int Gold { get { return gold; } }
 
-    //deafult 1
-    private int towerCnt = 10;
-    public int TowerCnt { get { return towerCnt; } }
+
+    //[2-2] 게임 필수정보 (왼쪽상단 UI)  default gold is 0
+    private int gold = 100;
+    private int stocks = 0;
+    private int towerCnt = 2;
     private int killCnt = 0;
+    public int Bills {      // 주식
+        get { return stocks; }
+        set { this.stocks = value; }
+    } 
+    public int Stage { get { return stage; } }  // 스테이지
+    private int life = 100;
+    private int wave = 1;
+    private int mobCnt = 0;
+
+    // [2-3] Getter Setter
+
+    public int Gold { get { return gold; } } // 골드
+    public int TowerCnt { get { return towerCnt; } } // 타워
+    private Wave[] allWaveInfos;
 
     // 캐릭터 status(일단 보류)(강화정보)
 
 
     // 게임 정보
-    private Wave[] allWaveInfos;
-    private int stage = 1;
-    private List<GameObject> myItems;
-    public List<GameObject> MyItems { get { return myItems; } }
-    private int wave = 1;
+
+
+    /* 아이템정보 - 다른곳으로 옮김
+     *  private List<GameObject> myItems;
+     *  public List<GameObject> MyItems { get { return myItems; } }
+     */
+
+
     //private int waveMobTotal;
-    private int life = 100;
-    private int mobCnt = 0;
+
+    // [2-4] 웨이브 정보
+
+    private int stage = 1;
     private int timer = 10;
     private int finalWave = 30;
 
@@ -93,51 +122,90 @@ public class GM : MonoBehaviour
     GameObject startBtn;
     // SerializeField
 
-    [SerializeField] GameObject stageText;
-    [SerializeField] GameObject waveText;
-    //[SerializeField] GameObject waveMobTotalText;
-    [SerializeField] GameObject lifeText;
-    [SerializeField] GameObject mobCntText;
-    [SerializeField] GameObject timerText;
-    //[SerializeField] GameObject towerCntText;
-    [SerializeField] GameObject killCntText;
-    [SerializeField] GameObject goldText;
+    //종섭 수정 - SerializeField - private, GameObject - TextMeshProUGUI
+    [SerializeField] private TextMeshProUGUI stageText, waveText, lifeText, mobCntText, timerText, killCntText, goldText, towerCntText, waveMobTotalText, stockText;
 
-    [Tooltip("캐릭터 선택 UI")]
-    [SerializeField] GameObject CharacterSelectPopUp;
-    [Tooltip("보상 UI")]
-    [SerializeField] GameObject WaveClearPopUp;
-    [Tooltip("결과 UI")]
-    [SerializeField] GameObject ResultPopUp;
-    [Tooltip("상호작용 UI")]
-    [SerializeField] GameObject InteractionPopUp;
+    /*  
+    * [3] 하이어라키 오브젝트
+    *
+    */
+    private GameObject stagesObject;
+    private GameObject totalManager;
+    private GameObject uiManager;
+
+    // UserEventController 로 이동
+    //[Tooltip("캐릭터 선택 UI")] 
+    //[SerializeField] GameObject CharacterSelectPopUp;
+    //[Tooltip("보상 UI")]
+    //[SerializeField] GameObject WaveClearPopUp;
+    //[Tooltip("결과 UI")]
+    //[SerializeField] GameObject ResultPopUp;
+    //[Tooltip("상호작용 UI")]
+    //[SerializeField] GameObject InteractionPopUp;
 
     // 받아와야할 값들
     private void Awake()
     {
-        startPoint = GameObject.FindGameObjectWithTag("StartPoint");
+        startPoint = GameObject.FindGameObjectWithTag("StartPoint"); // startPoint 옮겨야함
         startBtn = GameObject.Find("StartBtn");
+        stagesObject = GameObject.Find("Stages");
+        totalManager = GameObject.Find("uiManager");
+        uiManager = GameObject.Find("UI");
 
         // wave의 index는 현재 wave - 1
-        //allWaveInfos = startPoint.GetComponent<WaveSystem>().AllWaveInfos;
+        allWaveInfos = startPoint.GetComponent<WaveSystem>().AllWaveInfos;
 
         // UI 값들 초기화
-        goldText.GetComponent<TMP_Text>().text = gold.ToString();
-        lifeText.GetComponent<TMP_Text>().text = life.ToString();
+
+        stageText = uiManager.transform.Find("TopLeft_HUD_Infos/Info_StageAndTimer/Text_Stage").GetComponent<TextMeshProUGUI>();
+        waveText = uiManager.transform.Find("TopLeft_HUD_Infos/Info_StageAndTimer/Text_Wave").GetComponent<TextMeshProUGUI>();
+        timerText = uiManager.transform.Find("TopLeft_HUD_Infos/Info_StageAndTimer/Text_Timer").GetComponent<TextMeshProUGUI>();
+        lifeText = uiManager.transform.Find("TopLeft_HUD_Infos/Info_Life/Text_Life").GetComponent<TextMeshProUGUI>();
+        mobCntText = uiManager.transform.Find("TopLeft_HUD_Infos/Info_Mob/Text_MobCnt").GetComponent<TextMeshProUGUI>();
+        killCntText = uiManager.transform.Find("TopLeft_HUD_Infos/Info_KillCnt/Text_KillCnt").GetComponent<TextMeshProUGUI>();
+        goldText = uiManager.transform.Find("TopLeft_HUD_Infos/Info_Gold/Text_Gold").GetComponent<TextMeshProUGUI>();
+        towerCntText = uiManager.transform.Find("TopLeft_HUD_Infos/Info_TowerCnt/Text_TowerCnt").GetComponent<TextMeshProUGUI>();
+        stockText = uiManager.transform.Find("TopLeft_HUD_Infos/Info_Stock/Text_Stock").GetComponent<TextMeshProUGUI>();
+
+        // UI 초기 값 할당
+
 
     }
+
     private void Start()
     {
+
+        stageText.text = stage.ToString();
+        waveText.text = wave.ToString();
+        lifeText.text = life.ToString();
+        mobCntText.text = mobCnt.ToString();
+        timerText.text = timer.ToString();
+        killCntText.text = killCnt.ToString();
+        goldText.text = gold.ToString();
+        towerCntText.text = towerCnt.ToString();
+        stockText.text = stocks.ToString();
+
         // 이건 임의로 내가 계속 정해줘야하나? 웨이브를 스크립트로 작성하지 않는 한
-        finalWave = 2;
+        finalWave = 5;
         enemyList = startPoint.GetComponent<EnemySpawner>().EnemyList;
+        GameStart();
     }
 
     // 타워 설치
-    public void BuildTower()
+    public void BuildTower()    
     {
         towerCnt -= 1;
-        // towerCntText.GetComponent<TMP_Text>().text = towerCnt.ToString();
+        towerCntText.text = towerCnt.ToString();
+        
+    }
+
+    // 네비게이션용 업데이트(임시비활)
+    private void Update()
+    {
+        if (enemyList.Count > 0)
+        {
+            enemyNavi = enemyList[0];
+        }
     }
 
     // 네비게이션용 업데이트(임시비활)
@@ -160,15 +228,20 @@ public class GM : MonoBehaviour
         {
             gold -= Mathf.Abs(amount);
         }
-        goldText.GetComponent<TMP_Text>().text = gold.ToString();
+        goldText.text = gold.ToString();
+    }
+
+    public void UpdateStocks(int stock)
+    {
+        this.stocks += stock;
     }
 
     // 게임 시작
     public void GameStart()
     {
         isGameStart = true;
-        startBtn.SetActive(false);
-        timerText.GetComponent<TMP_Text>().text = "yes";
+        //startBtn.SetActive(false);
+        //timerText.GetComponent<TMP_Text>().text = "yes";
         startPoint.GetComponent<WaveSystem>().StartWave();
 
     }
@@ -176,11 +249,12 @@ public class GM : MonoBehaviour
     // 몹 정보
     public void MobCounter(bool isPlus, bool isKill = true)
     {
+        Debug.Log("werwerwer");
         // 웨이브 끝을 판단하는 로직
         if (isPlus)
         {
             mobCnt ++;
-            mobCntText.GetComponent<TMP_Text>().text = mobCnt.ToString();
+            mobCntText.text = mobCnt.ToString();
         } 
         else
         {
@@ -188,18 +262,16 @@ public class GM : MonoBehaviour
             {
                 killCnt ++;
                 mobCnt --;
-                killCntText.GetComponent<TMP_Text>().text = killCnt.ToString();
-                mobCntText.GetComponent<TMP_Text>().text = mobCnt.ToString();
+                killCntText.text = killCnt.ToString();
+                mobCntText.text = mobCnt.ToString();
             }
             else
             {
-                mobCnt -= 1;
-                mobCntText.GetComponent<TMP_Text>().text = mobCnt.ToString();
+                mobCnt --;
+                mobCntText.text = mobCnt.ToString();
             }
             if (isEndWave && mobCnt == 0)
             {
-                Debug.Log("타이머 시작");
-                // 웨이브 클리어 함수 호출, 트리거 변수들 초기화, PopUp
                 isEndWave = false;
 
                 ClearWave();
@@ -210,19 +282,24 @@ public class GM : MonoBehaviour
     // 생명력 감소
     public void LooseLife(int amount)
     {
+        Debug.Log("gm생명력감소");
         life -= Mathf.Abs(amount);
-        lifeText.GetComponent<TMP_Text>().text = life.ToString();
+        lifeText.text = life.ToString();
         MobCounter(false, false);
         if (life <= 0)
         {
-            lifeText.GetComponent<TMP_Text>().text = 0.ToString();
+            lifeText.text = 0.ToString();
             //게임오버 메소드 호출
             GameEnd(false);
         }
     }
+    public void towerCntUpdate(int count)
+    {
+        this.towerCnt += count;
+    }
 
     // 타이머
-    private IEnumerator Timer()
+        private IEnumerator Timer()
     {
         while ( timer > 0)
         {
@@ -231,15 +308,16 @@ public class GM : MonoBehaviour
             yield return new WaitForSeconds(1);
         }
         wave++;
-        waveText.GetComponent<TMP_Text>().text = wave.ToString();
-        timerText.GetComponent<TMP_Text>().text = "yes";
+        waveText.text = wave.ToString();
+        timerText.text = "yes";
         startPoint.GetComponent<WaveSystem>().StartWave();
     }
 
     // 타이머 시작
     private void StartTimer()
     {
-        timer = 20;
+        // 임시 시간 수정
+        timer = 3;
         timerText.GetComponent<TMP_Text>().text = timer.ToString();
         StartCoroutine("Timer");
     }
@@ -248,7 +326,7 @@ public class GM : MonoBehaviour
     private void ClearWave()
     {
         // 해당 웨이브 클리어, 보상 UI 출력, 최종웨이브 클리어시 게임셋
-        if (wave < finalWave)
+        if (wave <= finalWave)
         {
             StartTimer();
         } else
@@ -261,7 +339,7 @@ public class GM : MonoBehaviour
     {
         // 결과 UI 출력
         // gameResult 가 true면 게임을 클리어한 ending, false면 클리어 실패 ending
-        if(gameResult)
+        if (gameResult)
         {
             // clear ending
         }
@@ -270,4 +348,5 @@ public class GM : MonoBehaviour
             // failure ending
         }
     }
+
 }

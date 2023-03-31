@@ -46,9 +46,9 @@ public class Enemy : MonoBehaviourPunCallbacks
     // 몬스터 status
     public float mobHP;
     public float armor;
+    private float currentHP;
     public float CurrentHP { get { return currentHP; } set { currentHP = value; } }
 
-    private float currentHP;
     private float currentSpeed;
     private float currentArmor;
 
@@ -61,14 +61,17 @@ public class Enemy : MonoBehaviourPunCallbacks
 
     // 보스 status
     public bool isBoss = false;
+    public int skillIdx = 0;
+    public float coolDown = 3;
     public int power = 50;
     public int range = 100;
 
     // 스킬이펙트
-    [SerializeField] GameObject greenCircle;
     [SerializeField] ParticleSystem redCircle;
-    [SerializeField] GameObject Heal;
-    [SerializeField] GameObject groundCrush;
+
+    [SerializeField] ParticleSystem greenCircle;
+    [SerializeField] ParticleSystem Heel;
+    [SerializeField] ParticleSystem groundCrush;
 
     new Collider collider;
 
@@ -84,7 +87,10 @@ public class Enemy : MonoBehaviourPunCallbacks
         currentArmor = armor;
         anim = this.transform.GetChild(0).GetComponent<Animator>();
         collider = gameObject.GetComponent<Collider>();
-        StartCoroutine(WarningSkill(0, 5));
+        if (isBoss)
+        {
+            StartCoroutine(WarningSkill(skillIdx, coolDown));
+        }
 
     }
 
@@ -198,15 +204,27 @@ public class Enemy : MonoBehaviourPunCallbacks
         if (other.name == "character")
         {
             // Debug.Log("character hit");
-            ProcessHit(2 - armor,null,other.transform.position);
+            ProcessHit(2 - armor,null);
             //photonView.RPC("ProcessHit", RpcTarget.All, 2-armor);
 
         }
     }
 
+    public void processHeel(float num)
+    {
+        if( currentHP + num > mobHP)
+        {
+            currentHP = mobHP;
+        }
+        else
+        {
+            currentHP += num;
+        }
+    }
+
 
     [PunRPC]
-    public void ProcessHit(float Damage, [Optional] ParticleSystem effect, Vector3 hitPos)
+    public void ProcessHit(float Damage, [Optional] ParticleSystem effect)
     {
         if (effect)
         {
@@ -223,7 +241,13 @@ public class Enemy : MonoBehaviourPunCallbacks
         // 체력감소 로직
         if (Damage > currentArmor)
         {
+
             Damage -= currentArmor;
+            if (isBoss && Damage > (float)(mobHP * 0.15))
+            {
+                Damage = (float)(mobHP * 0.15);
+            }
+
             if (mobHP < Damage)
             {
                 damageText.GetComponent<TMP_Text>().text = "OverKill!";
@@ -264,16 +288,23 @@ public class Enemy : MonoBehaviourPunCallbacks
         }
     }
 
-    void OnCollisionEnter(Collision other)
+    void OnTriggerEnter(Collider other)
     {
 
-        if(other.collider.tag == "Weapon")
+        if(other.tag == "Weapon")
         {
-            Weapon weapon = other.collider.GetComponent<Weapon>();
-            PlayerStat playerStat = other.collider.GetComponentInParent<PlayerStat>();
+            Weapon weapon = other.GetComponent<Weapon>();
+            PlayerStat playerStat = other.GetComponentInParent<PlayerStat>();
             float attackDamage = weapon.damage + playerStat.CurrentDamage;
-            ProcessHit(attackDamage,weapon.hitEffect,other.contacts[0].point);
+            ProcessHit(attackDamage,weapon.hitEffect);
             //photonView.RPC("ProcessHit", RpcTarget.All,weaponDamage);
+        }else if(other.tag == "Arrow")
+        {
+            Arrow arrow = other.GetComponent<Collider>().GetComponent<Arrow>();
+            float attackDamage = arrow.damage;
+            ProcessHit(attackDamage, arrow.hitEffect);
+            GameObject arrow01 = other.transform.Find("Arrow01").gameObject;
+            Destroy(other.gameObject);
         }
     }
 
@@ -339,25 +370,22 @@ public class Enemy : MonoBehaviourPunCallbacks
     }
     private IEnumerator Skill_Heeling(float range = 100, float power = 1000)
     {
-        redCircle.Stop();
-        currentSpeed = speed;
+        greenCircle.transform.localScale = new Vector3(range / 3, 1, range / 3);
         GameObject[] enemies;
         enemies = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (GameObject enemy in enemies)
         {
-            float currentHP = enemy.GetComponent<Enemy>().currentHP;
-            float mobHP = enemy.GetComponent<Enemy>().mobHP;
+            
             float d = Vector3.Distance(transform.position, enemy.transform.position);
             if (d < range)
             {
-                if( currentHP + power > mobHP)
+                if(enemy.gameObject.transform.childCount == 4)
                 {
-                    currentHP = mobHP;
+                    ParticleSystem heelingEffect = Instantiate(Heel, enemy.transform);
+                    heelingEffect.transform.localScale = enemy.transform.GetChild(0).transform.localScale;
+                    heelingEffect.Play();
                 }
-                else
-                {
-                    currentHP += power;
-                }
+                enemy.GetComponent<Enemy>().processHeel(power);
             }
 
         }
@@ -387,9 +415,7 @@ public class Enemy : MonoBehaviourPunCallbacks
     {
         while (true)
         {
-            currentSpeed = 0;
-            redCircle.Play();
-            yield return new WaitForSeconds(3f);
+
             /*
             0 : 넉백
             1 : 힐링
@@ -397,17 +423,25 @@ public class Enemy : MonoBehaviourPunCallbacks
             */
             if (skillIdx == 0)
             {
+                currentSpeed = 0;
+                redCircle.Play();
+                yield return new WaitForSeconds(coolDown);
                 StartCoroutine(Skill_KnockBack(range, power));
             }
             else if (skillIdx == 1)
             {
+                greenCircle.Play();
+                yield return new WaitForSeconds(coolDown);
                 StartCoroutine(Skill_Heeling(range, power));
             }
             else if (skillIdx == 2)
             {
+                currentSpeed = 0;
+                redCircle.Play();
+                yield return new WaitForSeconds(coolDown);
                 StartCoroutine(Skill_Stun(range, power));
             }
-            yield return new WaitForSeconds(coolDown);
+            //yield return new WaitForSeconds(coolDown);
         }
     }
 }
