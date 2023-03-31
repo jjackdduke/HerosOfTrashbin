@@ -18,27 +18,30 @@ public class TowerWeapon : MonoBehaviour
 
     GameObject Spawner;
     [SerializeField] private TowerTemplate thisTowerTemplate;
+    ItemController towerStat;
     ParticleSystem effect;
 
-    float towerDamage => thisTowerTemplate.weapon[level - 1].Damage;
-    float towerAttackRate => thisTowerTemplate.weapon[level - 1].rate;
-    float towerAttackRange => thisTowerTemplate.weapon[level - 1].range;
+    float towerDamage => thisTowerTemplate.weapon[level - 1].Damage + towerStat.getTotalStack(3);
+    float towerAttackRate => thisTowerTemplate.weapon[level - 1].rate + towerStat.getTotalStack(4);
+    float towerAttackRange => thisTowerTemplate.weapon[level - 1].range + towerStat.getTotalStack(5);
+
     bool towerIsParticle => thisTowerTemplate.weapon[level - 1].isParticle;
     int towerIsDeBuff => thisTowerTemplate.weapon[level - 1].isDeBuff;
     bool towerIsZangPan => thisTowerTemplate.weapon[level - 1].isZangPan;
+
     bool towerIsLaser => thisTowerTemplate.weapon[level - 1].isLaser;
     float towerLaserRate => thisTowerTemplate.weapon[level - 1].LaserRate;
+
     GameObject towerMissile => thisTowerTemplate.weapon[level - 1].missile;
     float towerMissileUp => thisTowerTemplate.weapon[level - 1].missileUp;
     float towerMissileSpeed => thisTowerTemplate.weapon[level - 1].missileSpeed;
     float towerMissileWaitSecond => thisTowerTemplate.weapon[level - 1].missileWaitSecond;
+
     ParticleSystem towerHitEffect => thisTowerTemplate.weapon[0].hitEffect;
     AudioClip[] towerFireSound => thisTowerTemplate.weapon[0].FireSound;
     AudioClip[] towerHitSound => thisTowerTemplate.weapon[0].HitSound;
 
     BuildingTemplate CommonBuild;
-    AudioClip DoneBuildSound => CommonBuild.doneBuildSound;
-    AudioClip DoneUpgradeSound => CommonBuild.doneUpgradeSound;
     ParticleSystem DoneBuild => CommonBuild.doneBuild;
     ParticleSystem DoneUpgrade => CommonBuild.doneUpgrade;
     
@@ -66,23 +69,14 @@ public class TowerWeapon : MonoBehaviour
     
     private void Awake()
     {
-        //Debug.Log(level);
-        //Debug.Log(thisTowerTemplate.weapon[level - 1]);
-        childCnt = transform.childCount;
-        for (int i = 0 ; i < childCnt; i++)
-        {
-            transform.GetChild(i).gameObject.SetActive(false);
-        }
-        transform.GetChild(0).gameObject.SetActive(true);
-        Transform currentLevel = transform.GetChild(level);
-        currentLevel.gameObject.SetActive(true);
-        
-        Spawner = transform.GetChild(0).gameObject;
         this.enemies = FindObjectsOfType<Enemy>();
-        SpecialTower();
-        GameObject camera = GameObject.FindWithTag("MainCamera");
-        transform.rotation = new Quaternion(0, camera.transform.rotation.y -180, 0, transform.rotation.w);
         gm = FindObjectOfType<GM>();
+        towerStat = GameObject.Find("Manager").GetComponentInChildren<ItemController>();
+
+        ReadyToBuild();
+        SpecialTower();
+        LookScreen();
+        
     }
 
     private void Start()
@@ -101,6 +95,25 @@ public class TowerWeapon : MonoBehaviour
                 StartCoroutine(AttackToTarget());
             }
         }
+    }
+
+    void ReadyToBuild()
+    {
+        childCnt = transform.childCount;
+        for (int i = 0; i < childCnt; i++)
+        {
+            transform.GetChild(i).gameObject.SetActive(false);
+        }
+        transform.GetChild(0).gameObject.SetActive(true);
+        Transform currentLevel = transform.GetChild(level);
+        currentLevel.gameObject.SetActive(true);
+        Spawner = transform.GetChild(0).gameObject;
+    }
+
+    void LookScreen()
+    {
+        GameObject camera = GameObject.FindWithTag("MainCamera");
+        transform.rotation = new Quaternion(0, camera.transform.rotation.y - 180, 0, transform.rotation.w);
     }
 
     public void OnMouseUp()

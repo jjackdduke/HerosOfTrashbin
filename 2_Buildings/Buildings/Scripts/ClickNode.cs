@@ -3,19 +3,16 @@ using UnityEngine;
 using static TowerTemplate;
 using Random = System.Random;
 using TMPro;
+using UnityEditor.EditorTools;
 
 public class ClickNode : MonoBehaviour
 {
-    // ?좎룞?숉솢?좎룞?숉솕 ?좎룞?쇿뜝?숈삕
     public Color StartColor;
 
-    // ?쒎뜝?숈삕???좎룞?쇿뜝?숈삕
     public Color SelectColor;
 
-    // ?좎뙏?먯삕 ?좎룞?숈튂?좎룞???좎룞?숈튂?좎떎?듭삕?좎뙇?먯삕?좎룞???좎룞?쇿뜝?숈삕
     [SerializeField] int isBuilt = 0;
 
-    // ?좎룞?숈튂?좎룞????좎룞?쇿뜝?숈삕?좎룞?쇿뜝?숈삕 ?좎룞?쇿뜝?쒕챿??
     [SerializeField] BuildingTemplate Building;
     [SerializeField] TowerTemplate[] TowerPrefabs;
 
@@ -23,16 +20,15 @@ public class ClickNode : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI actionText;
 
-    // ?좎룞?쇿뜝?숈삕?좎룞?쇿뜝?숈삕 ?좎룞?쇿뜝?숈삕
     public Renderer rend;
 
-    // ?좎룞?쇿뜝?숈삕?좎룞???좎룞???좎룞?쇿뜝?숈삕 ?좎룞?쇿뜝?숈삕
     Random randomObj = new Random();
     int randomValue;
 
+    GameObject totalManager;
     GM gm;
+    GameObject UIObject;
 
-    // ?좎떎?쎌삕?좎룞?쇿뜝?숈삕?좎룞??
     private float buildDelay = 0.3f;
     GameObject arrow;
 
@@ -40,9 +36,12 @@ public class ClickNode : MonoBehaviour
 
     void Awake()
     {
-        gm = FindObjectOfType<GM>();
+        UIObject = GameObject.Find("UI");
+        // gm = FindObjectOfType<GM>();
+        totalManager = GameObject.Find("Manager");
+        gm = totalManager.transform.Find("GM").GetComponent<GM>();
         rend = GetComponent<Renderer>();
-        actionText = GameObject.Find("ShowText").gameObject.GetComponentInChildren<TextMeshProUGUI>();
+        actionText = UIObject.transform.Find("MidCenter_ShowText/actionText").GetComponent<TextMeshProUGUI>();
         rend.material.color = StartColor;
         arrow = transform.GetChild(2).gameObject;
     }

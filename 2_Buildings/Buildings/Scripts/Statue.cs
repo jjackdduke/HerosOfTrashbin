@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using Random = System.Random;
 
@@ -11,7 +13,7 @@ public class Statue : MonoBehaviour
     [SerializeField] ParticleSystem punish;
     [SerializeField] ParticleSystem punishEffect;
     [SerializeField] ParticleSystem deBuffEffect;
-    bool punishable = true;
+    public bool punishable = true;
     public bool Punishable { get { return punishable; } set { punishable = value; } }
 
     [SerializeField]
@@ -21,12 +23,10 @@ public class Statue : MonoBehaviour
     [SerializeField] float startPercent = 50;
     float currentPercent;
 
-    GameObject StatueParticle;
+    public GameObject StatueParticle;
 
     BGM bgm;
     GM gm;
-    [SerializeField] AudioClip StatueSound;
-    AudioSource audioSource;
     bool isNear = false;
 
     // Start is called before the first frame update
@@ -37,81 +37,62 @@ public class Statue : MonoBehaviour
 
         bgm = FindObjectOfType<BGM>();
         gm = FindObjectOfType<GM>();
-        audioSource = GetComponent<AudioSource>();
-        audioSource.clip = StatueSound;
-        audioSource.Play();
 
         currentPercent = startPercent;
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        if (isNear && audioSource.volume < 1)
-        {
-            audioSource.volume += Time.deltaTime * 0.4f;
-            bgm.AudioSource.volume -= Time.deltaTime * 0.2f;
-        }
-        if (!isNear && audioSource.volume > 0)
-        {
-            audioSource.volume -= Time.deltaTime * 0.4f;
-            if (bgm.AudioSource.volume < 0.2f)
-            {
-                bgm.AudioSource.volume += Time.deltaTime * 0.2f;
-            }
-        }
-    }
+    
 
-    private void OnTriggerStay(Collider other)
-    {
-        if (other.gameObject.tag == "Player")
-        {
-            isNear = true;
-            InfoAppear(punishable);
-            if (punishable)
-            {
-                if (Input.GetKey(KeyCode.E))
-                {
-                    Pray();
-                    punishable = false;
-                    StatueParticle.SetActive(punishable);
-                }
+    //private void OnTriggerStay(Collider other)
+    //{
+    //    if (other.gameObject.tag == "Player")
+    //    {
+    //        isNear = true;
+    //        InfoAppear(punishable);
+    //        if (punishable)
+    //        {
+    //            if (Input.GetKey(KeyCode.E))
+    //            {
+    //                Pray();
+    //                punishable = false;
+    //                StatueParticle.SetActive(punishable);
+    //            }
 
-            }
-        }
-    }
+    //        }
+    //    }
+    //}
 
-    private void OnTriggerExit(Collider other)
-    {
-        isNear = false;
-        InfoDisappear();
-    }
+    //private void OnTriggerExit(Collider other)
+    //{
+    //    isNear = false;
+    //    InfoDisappear();
+    //}
 
-    private void InfoAppear(bool show)
-    {
-        actionText.gameObject.SetActive(true);
-        if (show)
-        {
-            actionText.text = "The Jangseung is glaring. " + "Pray" + currentPercent + "%" + "<color=yellow>" + "(E)" + "</color>";
-        }
-        else
-        {
-            actionText.text = "The glare of the Jangseung has disappeared.";   
-        }
-    }
+    //private void InfoAppear(bool show)
+    //{
+    //    actionText.gameObject.SetActive(true);
+    //    if (show)
+    //    {
+    //        actionText.text = "The Jangseung is glaring. " + "Pray" + currentPercent + "%" + "<color=yellow>" + "(E)" + "</color>";
+    //    }
+    //    else
+    //    {
+    //        actionText.text = "The glare of the Jangseung has disappeared.";   
+    //    }
+    //}
 
-    private void InfoDisappear()
-    {
-        actionText.gameObject.SetActive(false);
-    }
+    //private void InfoDisappear()
+    //{
+    //    actionText.gameObject.SetActive(false);
+    //}
 
-    void Pray()
+    public void Pray()
     {
         randomValue  = randomObj.Next(0, 101);
         GameObject[] Sounds;
         Sounds = GameObject.FindGameObjectsWithTag("BackgroundSound");
         List<AudioSource> allAudio = new List<AudioSource>();
-        allAudio.Add(audioSource);
         foreach (GameObject sound in Sounds)
         {
             allAudio.Add(sound.GetComponent<AudioSource>());

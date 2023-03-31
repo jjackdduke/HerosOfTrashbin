@@ -14,12 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   towerPrefab: {fileID: 350395162714193125, guid: 96dd8950b2a561c4b9f0844cce5709ef,
     type: 3}
-  TowerSound: {fileID: 8300000, guid: 307ee2060ebc0ba4f8c55d48a664217b, type: 3}
   weapon:
   - Prefab: {fileID: 350395162714193125, guid: 96dd8950b2a561c4b9f0844cce5709ef, type: 3}
     Damage: 15
-    rate: 7
-    range: 100
+    rate: 8
+    range: 120
     cost: 0
     isParticle: 0
     isDeBuff: 0

@@ -29,6 +29,9 @@ public class EnemySpawner : MonoBehaviour
     // GM
     GM gm;
 
+    // 플레이어 수
+    private int playerCnt = 1;
+
     // 적 생성 시 파티클
     [SerializeField] ParticleSystem SpawnEffect;
 
@@ -58,7 +61,7 @@ public class EnemySpawner : MonoBehaviour
             GameObject clone = Instantiate(currentWave.enemyPrefabs[0], transform);
             Enemy enemy = clone.GetComponent<Enemy>();
             enemy.pathString = currentWave.pathString;
-            enemy.mobHP = currentWave.mobHP;
+            enemy.mobHP = currentWave.mobHP * playerCnt;
             enemy.isBoss = currentWave.isBoss;
             if (enemy.isBoss) { enemy.transform.GetChild(0).transform.localScale *= 2f; }
             enemy.lifePenalty = currentWave.lifePenalty;

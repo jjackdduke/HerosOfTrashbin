@@ -8,10 +8,17 @@ public class WaveSystem : MonoBehaviour
 
     [SerializeField] private EnemySpawner enemySpawner;
     [SerializeField] private Invest invest;
+    private GameObject stageObejct;
 
     // 현재 웨이브 인덱스
     private int currentWaveIndex = -1;
     // 현재 웨이브 참조
+
+    private void Awake()
+    {
+        stageObejct = GameObject.Find("Stages").gameObject;
+        invest = stageObejct.transform.Find("Stage2/EventBuildings/StockBuilding/Event_4_Stock").GetComponent<Invest>();
+    }
 
     public void StartWave()
     {
