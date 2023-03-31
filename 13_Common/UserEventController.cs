@@ -1,4 +1,6 @@
+using Com.MyTutorial.Photon;
 using OpenCover.Framework.Model;
+using Photon.Pun.Demo.PunBasics;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -6,26 +8,89 @@ using UnityEngine;
 
 public class UserEventController : MonoBehaviour
 {
-
-    private TextMeshProUGUI actionText;
+    private GameObject totalManager;
+    private GameObject uiManager;
+    private GameObject stages;
     private GameObject statusToggleScreen;
+    private GameObject miniMap;
+
+    private GameObject enhanceItemShop;
+    private GameObject hostpital;
+    private GameObject stockObject;
+    private GameObject hamburgerShop;
+    private GameObject jangSeung;
+
+    [Tooltip("캐릭터 선택 UI")]
+    [SerializeField] GameObject CharacterSelectPopUp;
+    [Tooltip("보상 UI")]
+    [SerializeField] GameObject WaveClearPopUp;
+    [Tooltip("결과 UI")]
+    [SerializeField] GameObject ResultPopUp;
+    [Tooltip("상호작용 UI")]
+    [SerializeField] GameObject InteractionPopUp;
+    
+    private TextMeshProUGUI actionText;
     private string eventMessage;
     private int eventNumber;
+    private GM gameManager;
+    private Invest invest;
+
+    private TextMeshProUGUI textTemp;
+
     private bool tabKeyPressed;
     private bool statusToggleActive;
+    private bool mapKeyPressed;
+    private bool miniMapActive;
 
-    // Start is called before the first frame update
+    private void Awake()
+    {
+
+        totalManager = GameObject.Find("Manager");
+        uiManager = GameObject.Find("UI");
+        stages = GameObject.Find("Stages");
+
+        gameManager = totalManager.transform.Find("GM").GetComponent<GM>();
+        
+        statusToggleScreen = uiManager.transform.Find("StatusToggleScreen").gameObject;
+        miniMap = uiManager.transform.Find("MiniMap").gameObject;
+      
+        enhanceItemShop = uiManager.transform.Find("MidCenter_EventUI/UI_EnhanceItemShop").gameObject;
+        hostpital = uiManager.transform.Find("MidCenter_EventUI/UI_Hostpital").gameObject;
+        stockObject = uiManager.transform.Find("MidCenter_EventUI/UI_Stock").gameObject;
+        hamburgerShop = uiManager.transform.Find("MidCenter_EventUI/UI_HamburgerShop").gameObject;
+        jangSeung = uiManager.transform.Find("MidCenter_EventUI/UI_JangSeung").gameObject;
+
+        actionText = uiManager.transform.Find("MidCenter_ShowText/actionText").GetComponent<TextMeshProUGUI>();
+
+        textTemp = stockObject.transform.Find("UI_Shop/InvestGoldInfo/Text_InvestGoldInfo").gameObject.GetComponent<TextMeshProUGUI>();
+
+        invest = stages.transform.Find("Stage2/EventBuildings/StockBuilding/Event_4_Stock").gameObject.GetComponent<Invest>();
+    }
+    // Start is called before the first frame update    
     void Start()
     {
-        actionText = GameObject.Find("actionText").GetComponent<TextMeshProUGUI>();
-        statusToggleScreen = GameObject.Find("StatusToggleScreen");
+
         actionText.gameObject.SetActive(false);
+
+        enhanceItemShop.gameObject.SetActive(false);
+        hostpital.gameObject.SetActive(false);
+        stockObject.gameObject.SetActive(false);
+        hamburgerShop.gameObject.SetActive(false);
+        jangSeung.gameObject.SetActive(false);
+
+        // 스테이터스 창은 시작할 때 비활성화
         statusToggleScreen.SetActive(false);
         tabKeyPressed = false;
         statusToggleActive = false;
+
+        // 미니맵은 시작할 때 활성화 상태로 시작
+        mapKeyPressed = true;
+        miniMapActive = true;
+        // UI 텍스트 미리 할당해놓기
+
     }
 
-    // 영준 : Tab 키를 눌렀다 뗐을 때 스테이터스 창을 열고 닫는 동작 수행
+    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab))
@@ -38,8 +103,26 @@ public class UserEventController : MonoBehaviour
             {
                 statusToggleActive = !statusToggleActive;
                 statusToggleScreen.SetActive(statusToggleActive);
+                // 스테이터스 창이 열릴 때는 미니맵을 비활성화, 닫을 때는 활성화
+                miniMapActive = !statusToggleActive ? true : false;
+                miniMap.SetActive(miniMapActive);
             }
             tabKeyPressed = false;
+        }
+
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            mapKeyPressed = true;
+        }
+        if (Input.GetKeyUp(KeyCode.M))
+        {
+            // 스테이터스 창이 안 닫혀 있을 때만 맵 토글 가능
+            if (mapKeyPressed && !statusToggleActive)
+            {
+                miniMapActive = !miniMapActive;
+                miniMap.SetActive(miniMapActive);
+            }
+            mapKeyPressed = false;
         }
     }
 
@@ -47,28 +130,28 @@ public class UserEventController : MonoBehaviour
     {
         switch (other.gameObject.name)
         {
-            case "GoddessStatue":
-                eventMessage = "여신상을 활성화";
+            case "Event_0_JangSeung": // 여신상 -> 장승
+                eventMessage = "장승을 활성화";
                 eventNumber = 0;
                 break;
-            case "Pharmacy":
-                eventMessage = "알약이의 약국 열기";
+            case "Event_1_Hospital": // 약국 -> 병원
+                eventMessage = "알약이의 병원 입장";
                 eventNumber = 1;
                 break;
-            case "EnhanceItemStore":
-                eventMessage = "스텟 강화 상점 열기";
-                eventNumber = 2;
+            case "Event_2_EnhanceItemShop":
+                eventMessage = "스텟 강화 상점 입장";
+                eventNumber = 2;   
                 break;
-            case "WeaponItemStore":
-                eventMessage = "무기 가게 열기";
+            case "Event_3_HamburgerShop":
+                eventMessage = "햄버거 가게 입장";
                 eventNumber = 3;
                 break;
-            case "EventBank":
-                eventMessage = "S전자 주식 구매하기";
+            case "Event_4_Stock":
+                eventMessage = "싸피 주식 거래소 입장";
                 eventNumber = 4;
                 break;
             default:
-                eventMessage = "이건뭐시여?";
+                eventMessage = "알수없는 이벤트?";
                 eventNumber = -1;
                 break;
         }
@@ -89,15 +172,25 @@ public class UserEventController : MonoBehaviour
     {
         switch(eventNumber)
         {
-            case 0: // 여신상
+            case 0: // 장승
+                jangSeung.gameObject.SetActive(true);
+
                 break;
             case 1: // 알약이
+                hostpital.gameObject.SetActive(true);
+
                 break;
             case 2: // 스텟강화 상점
+                enhanceItemShop.gameObject.SetActive(true);
+
                 break;
-            case 3: // 무기가게
+            case 3: // 햄버거가게
+                hamburgerShop.gameObject.SetActive(true);
+
                 break;
             case 4: // S전자 주식
+                stockObject.gameObject.SetActive(true);
+
                 break;
             case 5:
                 break;
@@ -111,8 +204,11 @@ public class UserEventController : MonoBehaviour
         }
     }
 
-    public void StatusScreenToggle()
+    public void updateCurrentGold()
     {
-
+        textTemp.text = gameManager.Gold.ToString();
+        Debug.Log(textTemp.text);
     }
+
+
 }
