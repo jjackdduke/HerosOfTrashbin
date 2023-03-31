@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class ArcherPlayerMover : MonoBehaviour
 {
@@ -11,8 +13,10 @@ public class ArcherPlayerMover : MonoBehaviour
     // 이동 속도
     [SerializeField] private float moveSpeed;
     [SerializeField] private float jumpPower;
-   
 
+
+    public Image skillFilter;
+     
     
     // 회전 속도
     //[SerializeField] float rotateSpeed = 10.0f;
@@ -40,11 +44,15 @@ public class ArcherPlayerMover : MonoBehaviour
     Vector3 moveVec;
 
 
-    float fireDelay = 10000f; // 이 값은 큰값으로만 정하면 된다.
+    float fireDelay = 1000f; // 이 값은 큰값으로만 정하면 된다.
                               // 공격속도는 Weapon에서 조절  
                                 
     float skillDelay = 10f;
-    public float skillCoolTime = 4f;
+    int shotCnt = 10;
+    public float skillCoolTime = 4f; // 스킬 쿨타임 정하는 곳 
+    public TextMeshProUGUI coolTimeCounter;
+
+    private float currentCoolTime;
 
     void Start()
     {
@@ -54,6 +62,8 @@ public class ArcherPlayerMover : MonoBehaviour
         rigid = GetComponent<Rigidbody>();
         archerPlayerStat = GetComponent<ArcherPlayer>();
         jumpPower = 20f;
+        skillFilter.fillAmount = 0;
+
 
     }
 
@@ -99,14 +109,14 @@ public class ArcherPlayerMover : MonoBehaviour
 
     void Attack()
     {
-        if (equipWeapon == null || isRun)
+        if (equipWeapon == null || isRun || anim.GetBool("IsMultiShot"))
             return;
         
         fireDelay += Time.deltaTime;
         isFireReady = equipWeapon.rate < fireDelay;
 
         skillDelay += Time.deltaTime;
-        isSkillReady = skillCoolTime < skillDelay;
+        isSkillReady = skillCoolTime <= skillDelay;
 
         if (fDown && isFireReady)
         {
@@ -122,11 +132,12 @@ public class ArcherPlayerMover : MonoBehaviour
 
         if (skillDown && isSkillReady && !fDown)
         {
+            shotCnt = 10;
+            skillFilter.fillAmount = 1;
             anim.SetTrigger("MultiShot");
-            skillDelay = 0;
+            anim.SetBool("IsMultiShot", true);
+            equipWeapon.UseSkill();
         }
-
-        
 
     }
 
@@ -134,10 +145,7 @@ public class ArcherPlayerMover : MonoBehaviour
     {
 
         if (fDown) return;
-        if (anim.GetCurrentAnimatorStateInfo(0).IsName("MultiShot"))
-        {
-            return;
-        }
+        
 
         //anim.SetBool("IsFire", false);
 
@@ -167,8 +175,17 @@ public class ArcherPlayerMover : MonoBehaviour
         if (!isBorder)
             transform.position += moveVec * local_moveSpeed * Time.deltaTime;
 
-        anim.SetBool("IsMove", moveVec != Vector3.zero);
-        anim.SetBool("IsRun", isRun);
+        // 스킬샷 도중이라면 이동 애니메이션으로 바뀌지 않는다
+        if (anim.GetCurrentAnimatorStateInfo(0).IsName("MultiShot"))
+        {
+            return;
+        }
+        else
+        {
+            anim.SetBool("IsMove", moveVec != Vector3.zero);
+            anim.SetBool("IsRun", isRun);
+        }
+        
     }
 
     void Rotate()
@@ -202,8 +219,6 @@ public class ArcherPlayerMover : MonoBehaviour
             //anim.SetTrigger("IsLand");
             anim.SetBool("isJump", false);
 
-            
-            
             isJump = false;
         }
     }
@@ -219,6 +234,53 @@ public class ArcherPlayerMover : MonoBehaviour
         equipWeapon.fireEndAnimation();
     }
 
-   
+
+
+    public void MultiShotAnim_End(int cnt)
+    {
+
+
+        shotCnt -= cnt;
+        if(shotCnt <= 0)
+        {
+            
+            anim.SetBool("IsMultiShot", false);
+            StartCoroutine("Cooltime");
+            currentCoolTime = skillCoolTime;
+            coolTimeCounter.text = "" + currentCoolTime;
+            StartCoroutine("CoolTimeCounter");
+            skillDelay = 0;
+            shotCnt = 10;
+            
+        }
+    }
+
+
+    IEnumerator Cooltime()
+    {
+        while(skillFilter.fillAmount > 0)
+        {
+            skillFilter.fillAmount -= 1 * Time.smoothDeltaTime / skillCoolTime;
+
+            yield return null;
+        }
+
+        yield break;
+
+    }
+
+
+    IEnumerator CoolTimeCounter()
+    {
+        while (currentCoolTime > 0)
+        {
+            yield return new WaitForSeconds(1.0f);
+            currentCoolTime -= 1.0f;
+            coolTimeCounter.text = "" + currentCoolTime;
+        }
+
+        coolTimeCounter.text = "";
+        yield break;
+    }
 
 }

@@ -22,9 +22,11 @@ public class ActionContollrer : MonoBehaviour
     [SerializeField]
     private Inventory theInventory;
 
+    private UserEventController userEventController;
+
     void Start()
-    { 
-        
+    {
+        userEventController = GameObject.Find("EventManager").GetComponent<UserEventController>();
     }
 
     void Update()
@@ -53,24 +55,57 @@ public class ActionContollrer : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        if(other.gameObject.tag == "Item")
-        {   
-            ItemInfoAppear(other);
+        // 종섭 수정 - switch 문으로 수정, eventTags 등록
+        switch (other.gameObject.tag)
+        {
+            case "Item":
+                // Item UI 뜨게하기
+                ItemInfoAppear(other);
+                if (Input.GetKey(KeyCode.Z))
+                {
+                    CanPickUp(other);
+                }
+                break;
 
-            if (Input.GetKey(KeyCode.Z))
-            {
-                CanPickUp(other);
-            }
+            case "EventTags":
+                Debug.Log("이벤트 발생!");
+                int eventNumber = userEventController.EventInfoAppear(other);
+                if (Input.GetKey(KeyCode.E))
+                {
+                    userEventController.PlayEvent(eventNumber);
+                    Debug.Log($" 이벤트 발생!!");
+                }   
+                break;
 
         }
+
+        //if(other.gameObject.tag == "Item")
+        //{   
+        //    ItemInfoAppear(other);
+
+        //    if (Input.GetKey(KeyCode.Z))
+        //    {
+        //        CanPickUp(other);
+        //   }
+
+        //}
         
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.tag == "Item")
+        switch (other.gameObject.tag)
         {
-            InfoDisappear();
+            case "Item":
+                InfoDisappear(); // item 사라지기
+
+                break;
+
+            case "EventTags":
+                userEventController.EventInfoDisappear();
+
+                break;
+
         }
     }
 
@@ -79,7 +114,7 @@ public class ActionContollrer : MonoBehaviour
         pickupActivated = true;
         actionText.gameObject.SetActive(true);
         actionText.text = other.transform.GetComponent<ItemPickUp>()
-            .item.itemName + "ȹ�� " + "<color=yellow>" + "(Z)" + "</color>";
+            .item.itemName + "아이템 획득 " + "<color=yellow>" + "(Z)" + "</color>";
     }
 
     private void InfoDisappear()

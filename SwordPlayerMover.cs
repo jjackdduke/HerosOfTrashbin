@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine;
-using UnityEngine.Animations;
+using UnityEngine.UI;
+using TMPro;
 
 public class SwordPlayerMover : MonoBehaviour
 {
@@ -13,13 +14,14 @@ public class SwordPlayerMover : MonoBehaviour
     [SerializeField] private float moveSpeed;
     [SerializeField] private float jumpPower;
 
+
     
     // 회전 속도
     //[SerializeField] float rotateSpeed = 10.0f;
 
     Animator anim;
     Rigidbody rigid;
-    SwordPlayer swordPlayerStat;
+    PlayerStat playerStat;
 
 
     float h, v;
@@ -42,7 +44,12 @@ public class SwordPlayerMover : MonoBehaviour
 
     float fireDelay;
     float skillDelay = 10f;
-    public float skillCoolTime = 3f;
+    public float skillCoolTime = 4f; // 스킬 쿨타임 정하는 곳 
+    int swingCnt = 10;
+    public Image skillFilter;
+    public TextMeshProUGUI coolTimeCounter;
+    private float currentCoolTime;
+
 
     void Start()
     {
@@ -50,7 +57,7 @@ public class SwordPlayerMover : MonoBehaviour
         anim = GetComponent<Animator>();
         equipWeapon = GetComponentInChildren<Weapon>();
         rigid = GetComponent<Rigidbody>();
-        swordPlayerStat = GetComponent<SwordPlayer>();
+        playerStat = GameObject.Find("SwordPlayerBody").GetComponent<PlayerStat>();
         jumpPower = 20f;
 
     }
@@ -113,7 +120,7 @@ public class SwordPlayerMover : MonoBehaviour
         //isFireReady = equipWeapon.rate < fireDelay;
 
         skillDelay += Time.deltaTime;
-        isSkillReady = skillCoolTime < skillDelay;
+        isSkillReady = skillCoolTime <= skillDelay;
 
         if (fDown)
         {
@@ -127,6 +134,8 @@ public class SwordPlayerMover : MonoBehaviour
         if (skillDown && isSkillReady && !fDown)
         {
             anim.SetTrigger("Whirlwind");
+            swingCnt = 10;
+            skillFilter.fillAmount = 1;
             //anim.SetBool("IsWhirlwind", true);
             //equipWeapon.UseSkill();
             skillDelay = 0;
@@ -149,7 +158,7 @@ public class SwordPlayerMover : MonoBehaviour
         }
 
 
-        moveSpeed = swordPlayerStat.CurrentSpeed;
+        moveSpeed = playerStat.CurrentSpeed;
         float local_moveSpeed = moveSpeed;
 
         moveVec = new Vector3(h, 0, v);
@@ -163,7 +172,7 @@ public class SwordPlayerMover : MonoBehaviour
 
         if (shiftPressed)
         {
-            local_moveSpeed = local_moveSpeed * 4.0f;
+            local_moveSpeed = local_moveSpeed * 2.0f;
             isRun = true;
         }
         else
@@ -226,9 +235,53 @@ public class SwordPlayerMover : MonoBehaviour
         equipWeapon.WhirlwindAnimation();
     }
 
-    public void Reset_State()
+    public void Whirlwind_End(int cnt)
     {
-        equipWeapon.WhirlwindEndAnimation();
+        swingCnt -= cnt;
+        Debug.Log("swingCnt: " + swingCnt);
+        if (swingCnt <= 0)
+        {
+
+            anim.SetBool("IsWhirlwind", false);
+            StartCoroutine("Cooltime");
+            currentCoolTime = skillCoolTime;
+            coolTimeCounter.text = "" + currentCoolTime;
+            StartCoroutine("CoolTimeCounter");
+            skillDelay = 0;
+            swingCnt = 10;
+            equipWeapon.WhirlwindEndAnimation();
+
+        }
+
+        
+    }
+
+
+    IEnumerator Cooltime()
+    {
+        while (skillFilter.fillAmount > 0)
+        {
+            skillFilter.fillAmount -= 1 * Time.smoothDeltaTime / skillCoolTime;
+
+            yield return null;
+        }
+
+        yield break;
+
+    }
+
+
+    IEnumerator CoolTimeCounter()
+    {
+        while (currentCoolTime > 0)
+        {
+            yield return new WaitForSeconds(1.0f);
+            currentCoolTime -= 1.0f;
+            coolTimeCounter.text = "" + currentCoolTime;
+        }
+
+        coolTimeCounter.text = "";
+        yield break;
     }
 
 }

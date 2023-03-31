@@ -12,6 +12,6 @@ public class ArcherPlayer : PlayerStat
     void Start()
     {
         playerDamage = ArcherDamage;
-        playerSpeed = ArcherSpeed;
+        playerMoveSpeed = ArcherSpeed;
     }
 }

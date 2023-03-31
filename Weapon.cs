@@ -18,6 +18,7 @@ public class Weapon : MonoBehaviour
     GameObject arrows;
     public ParticleSystem hitEffect;
     public Transform arrowPos;
+    public Transform[] multiShotPos;
     public GameObject arrow;
 
 
@@ -57,6 +58,9 @@ public class Weapon : MonoBehaviour
         if(type == Type.Melee)
         {
             anim.SetBool("IsWhirlwind", true);
+        }else if(type == Type.Range)
+        {
+            
         }
     }
 
@@ -75,6 +79,23 @@ public class Weapon : MonoBehaviour
 
     }
 
+    IEnumerator MultiShot()
+    {
+        GameObject[] multiShotArrow = new GameObject[7];
+        for (int pos = 0; pos < multiShotPos.Length; pos++)
+        {
+            multiShotArrow[pos] = Instantiate(arrow, multiShotPos[pos].position, multiShotPos[pos].rotation);
+        }
+
+        yield return new WaitForSeconds(1f);
+
+        for (int pos = 0; pos < multiShotPos.Length; pos++)
+        {
+            Destroy(multiShotArrow[pos]); 
+        }
+
+    }
+
 
     // 궁수 애니메이션
     public void fireAnimation()
@@ -89,6 +110,15 @@ public class Weapon : MonoBehaviour
         anim.SetBool("IsFire", false);
         anim2.SetBool("IsFire", false);
     }
+
+
+    public void MultiShotAnim_Start()
+    {
+        StartCoroutine("MultiShot");
+    }
+
+
+    
 
 
     // 소드맨 애니메이션
