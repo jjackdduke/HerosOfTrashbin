@@ -46,9 +46,9 @@ public class Enemy : MonoBehaviourPunCallbacks
     // 몬스터 status
     public float mobHP;
     public float armor;
+
     private float currentHP;
     public float CurrentHP { get { return currentHP; } set { currentHP = value; } }
-
     private float currentSpeed;
     private float currentArmor;
 
@@ -97,7 +97,6 @@ public class Enemy : MonoBehaviourPunCallbacks
     // Update is called once per frame
     void Update()
     {
-
         // 이동할 타겟이 없을 경우
         if (targetPathNode == null)
         {
@@ -294,8 +293,8 @@ public class Enemy : MonoBehaviourPunCallbacks
         if(other.tag == "Weapon")
         {
             Weapon weapon = other.GetComponent<Weapon>();
-            PlayerStat playerStat = other.GetComponentInParent<PlayerStat>();
-            float attackDamage = weapon.damage + playerStat.CurrentDamage;
+            PlayerStat playerStat = GameObject.Find("Player").GetComponent<PlayerStat>();
+            float attackDamage = weapon.damage + playerStat.CurrentStatus(1);
             ProcessHit(attackDamage,weapon.hitEffect);
             //photonView.RPC("ProcessHit", RpcTarget.All,weaponDamage);
         }else if(other.tag == "Arrow")
@@ -347,11 +346,10 @@ public class Enemy : MonoBehaviourPunCallbacks
         currentArmor = armor;
     }
 
-    private IEnumerator Skill_KnockBack(float range = 100, float power = 50)
+    private IEnumerator Skill_KnockBack(float range = 100, float power = 50, float coolDown = 3)
     {
         redCircle.Stop();
         currentSpeed = speed;
-        redCircle.transform.localScale = new Vector3(range / 3, 1, range / 3);
         GameObject[] players;
         players = GameObject.FindGameObjectsWithTag("Player");
         foreach ( GameObject player in players)
@@ -366,11 +364,10 @@ public class Enemy : MonoBehaviourPunCallbacks
 
         }
         //Destroy(skillRange, 0.5f);
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(coolDown);
     }
-    private IEnumerator Skill_Heeling(float range = 100, float power = 1000)
+    private IEnumerator Skill_Heeling(float range = 100, float power = 1000, float coolDown = 3)
     {
-        greenCircle.transform.localScale = new Vector3(range / 3, 1, range / 3);
         GameObject[] enemies;
         enemies = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (GameObject enemy in enemies)
@@ -389,9 +386,9 @@ public class Enemy : MonoBehaviourPunCallbacks
             }
 
         }
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(coolDown);
     }
-    private IEnumerator Skill_Stun(float range = 100, float power = 50)
+    private IEnumerator Skill_Stun(float range = 100, float power = 50, float coolDown = 3)
     {
         redCircle.Stop();
         currentSpeed = speed;
@@ -408,7 +405,7 @@ public class Enemy : MonoBehaviourPunCallbacks
             }
 
         }
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(coolDown);
     }
 
     private IEnumerator WarningSkill(int skillIdx, float coolDown)
@@ -424,24 +421,45 @@ public class Enemy : MonoBehaviourPunCallbacks
             if (skillIdx == 0)
             {
                 currentSpeed = 0;
+                redCircle.transform.localScale = new Vector3(range / 2, 1, range / 2);
                 redCircle.Play();
-                yield return new WaitForSeconds(coolDown);
-                StartCoroutine(Skill_KnockBack(range, power));
+                yield return new WaitForSeconds(3f);
+                anim.SetTrigger("skill");
+                //StartCoroutine(Skill_KnockBack(range, power, coolDown));
             }
             else if (skillIdx == 1)
             {
+                greenCircle.transform.localScale = new Vector3(range / 3, 1, range / 3);
                 greenCircle.Play();
-                yield return new WaitForSeconds(coolDown);
-                StartCoroutine(Skill_Heeling(range, power));
+                yield return new WaitForSeconds(3f);
+                //StartCoroutine(Skill_Heeling(range, power, coolDown));
             }
             else if (skillIdx == 2)
             {
                 currentSpeed = 0;
+                redCircle.transform.localScale = new Vector3(range / 3, 1, range / 3);
                 redCircle.Play();
-                yield return new WaitForSeconds(coolDown);
-                StartCoroutine(Skill_Stun(range, power));
+                yield return new WaitForSeconds(3f);
+                //StartCoroutine(Skill_Stun(range, power, coolDown));
             }
-            //yield return new WaitForSeconds(coolDown);
+            yield return new WaitForSeconds(coolDown);
+        }
+    }
+
+    public void Skill()
+    {
+        if (skillIdx == 0)
+        {
+            Debug.Log("ehlsi");
+            StartCoroutine(Skill_KnockBack(range, power, coolDown));
+        }
+        else if (skillIdx == 1)
+        {
+            StartCoroutine(Skill_Heeling(range, power, coolDown));
+        }
+        else if (skillIdx == 2)
+        {
+            StartCoroutine(Skill_Stun(range, power, coolDown));
         }
     }
 }

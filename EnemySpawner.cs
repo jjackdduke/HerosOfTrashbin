@@ -95,9 +95,13 @@ public class EnemySpawner : MonoBehaviour
             Instantiate(SpawnEffect, clone.transform.position, Quaternion.identity);
             Debug.Log("여기올텐데");
             gm.MobCounter(true);
+            if (spawnEnemyCount == currentWave.maxEnemyCount)
+            {
+                gm.isEndWave = true;
+            }
             yield return new WaitForSeconds(currentWave.spawnTime);
         }
-        gm.isEndWave = true;
+        // gm.isEndWave = true;
         // 임시방편으로 이렇게 해놈
         // enemyList = new List<Enemy>();
     }
