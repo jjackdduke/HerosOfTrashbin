@@ -21,9 +21,9 @@ public class TowerWeapon : MonoBehaviour
     ItemController towerStat;
     ParticleSystem effect;
 
-    float towerDamage => thisTowerTemplate.weapon[level - 1].Damage + towerStat.getTotalStack(3);
-    float towerAttackRate => thisTowerTemplate.weapon[level - 1].rate + towerStat.getTotalStack(4);
-    float towerAttackRange => thisTowerTemplate.weapon[level - 1].range + towerStat.getTotalStack(5);
+    float towerDamage => thisTowerTemplate.weapon[level - 1].Damage * towerStat.getTotalStack(101);
+    float towerAttackRate => thisTowerTemplate.weapon[level - 1].rate * towerStat.getTotalStack(102);
+    float towerAttackRange => thisTowerTemplate.weapon[level - 1].range * towerStat.getTotalStack(103);
 
     bool towerIsParticle => thisTowerTemplate.weapon[level - 1].isParticle;
     int towerIsDeBuff => thisTowerTemplate.weapon[level - 1].isDeBuff;

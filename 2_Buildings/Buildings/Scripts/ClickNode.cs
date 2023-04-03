@@ -1,9 +1,7 @@
 using System.Collections;
 using UnityEngine;
-using static TowerTemplate;
 using Random = System.Random;
 using TMPro;
-using UnityEditor.EditorTools;
 
 public class ClickNode : MonoBehaviour
 {

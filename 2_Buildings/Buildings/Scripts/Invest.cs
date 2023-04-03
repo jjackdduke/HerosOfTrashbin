@@ -12,15 +12,14 @@ public class Invest : MonoBehaviour
     int randomValue;
     [SerializeField] int ratio;
 
-    [SerializeField] int stock = 0;
-    [SerializeField ]int currentStock;
+    [SerializeField ]int stockPrice;
 
     [SerializeField] ParticleSystem startInvest;
     [SerializeField] ParticleSystem doneInvest;
 
     [SerializeField]
-    // private TextMeshProUGUI actionText;
-
+    private TextMeshProUGUI investText, stockPriceText;
+    private GameObject uiManager;
     private Invest invest;
 
     BGM bgm;
@@ -32,14 +31,21 @@ public class Invest : MonoBehaviour
     private void Awake()
     {
         invest = GameObject.Find("Event_4_Stock").GetComponent<Invest>();
+        uiManager = GameObject.Find("UI").gameObject;
+
+        stockPriceText = uiManager.transform.Find("MidCenter_EventUI/UI_Stock/UI_Shop/Item_No8_Stock/Text_Cost").GetComponent<TextMeshProUGUI>();
+        investText = uiManager.transform.Find("MidCenter_EventUI/UI_Stock/UI_Shop/InvestGoldInfo/Text_InvestGoldInfo").GetComponent<TextMeshProUGUI>();
+        gm = FindObjectOfType<GM>();
+        
+        bgm = FindObjectOfType<BGM>();
+        audioSource = GetComponent<AudioSource>();
+
     }
     void Start()
     {
-        gm = FindObjectOfType<GM>();
-
-        bgm = FindObjectOfType<BGM>();
-        audioSource = GetComponent<AudioSource>();
-        currentStock = stock;
+        stockPrice = 100; // 초기 주식가격 : 100원
+        stockPriceText.text = stockPrice.ToString();
+        investText.text = 0.ToString();
     }
 
     // Update is called once per frame
@@ -111,8 +117,9 @@ public class Invest : MonoBehaviour
 
     public void DoInvest()
     {
-        gm.Withdraw(currentStock, false);
+        // gm.Withdraw(currentStock, false);
         gm.UpdateStocks(1);
+        investText.text = (gm.StockProperty * stockPrice).ToString();
         // Instantiate(startInvest, transform.position, Quaternion.identity);
     }
 
@@ -126,13 +133,27 @@ public class Invest : MonoBehaviour
     {
         randomValue = randomObj.Next(0, 46);
         ratio = randomValue - 15;
-        currentStock = (int) Mathf.Round(currentStock * (1 + ((float)ratio / 100))); // 반올림
+
+        // Ratio 가 0보다 작으면 하락, 0보다 작으면 상승이라고 띄워주기
+        if(ratio > 0)
+        {
+            Debug.Log($"주식떡상 !!! {ratio}%");
+        }
+        else
+        {
+            Debug.Log($"주식하락 ㅠㅠ {ratio}%");
+        }
+
+        stockPrice = (int) Mathf.Round(stockPrice * (1 + ((float)ratio / 100))); // 반올림
+        stockPriceText.text = stockPrice.ToString();
+        investText.text = (gm.StockProperty * stockPrice).ToString();
     }
 
     public void GetResult()
     {
-        gm.Withdraw((gm.Bills * currentStock), true);
-        gm.Bills = 0;
+        gm.Withdraw(gm.StockProperty * stockPrice, true);
+        gm.StockProperty = 0;
+        investText.text = (gm.StockProperty * stockPrice).ToString();
         Instantiate(doneInvest, transform.position, Quaternion.identity);
     }
 }

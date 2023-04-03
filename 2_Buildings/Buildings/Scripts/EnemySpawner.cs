@@ -5,7 +5,9 @@ using UnityEngine;
 public class EnemySpawner : MonoBehaviour
 {
     // 적 프리펩
-    [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] private GameObject[] enemyPrefabs;
+    // 스페셜 몹 프리펩
+    [SerializeField] private GameObject[] specialPrefabs;
 
     // 임의 시작용 wavesystem
     [SerializeField] private GameObject startt;
@@ -40,30 +42,50 @@ public class EnemySpawner : MonoBehaviour
         // 적 리스트 메모리 할당
         enemyList = new List<Enemy>();
         gm = FindObjectOfType<GM>();
+        Debug.Log(gm.name + "나오나");
     }
 
-    public void StartWave(Wave wave)
+    public void StartWave(Wave wave, int idx)
     {
         // 매개변수로 받아온 웨이브 정보 저장
         currentWave = wave;
 
         // 현재 웨이브 시작
-        StartCoroutine("SpawnEnemy");
+        StartCoroutine("SpawnEnemy", idx);
     }
 
-    private IEnumerator SpawnEnemy()
+    public void StartSpecialWave(SpecialWave SpecialWave, int idx)
+    {
+        GameObject clone = Instantiate(specialPrefabs[idx], transform);
+        Enemy enemy = clone.GetComponent<Enemy>();
+        enemy.transform.GetChild(0).transform.localScale *= 2f;
+        enemy.pathString = SpecialWave.pathString;
+        enemy.mobHP = SpecialWave.mobHP * playerCnt;
+        enemy.lifePenalty = SpecialWave.lifePenalty;
+        enemy.speed = SpecialWave.speed;
+        enemy.armor = SpecialWave.armor;
+        enemy.isBoss = true;
+        enemy.skillIdx = SpecialWave.skillIdx;
+        enemy.coolDown = SpecialWave.coolDown;
+        enemy.range = SpecialWave.range;
+        enemy.power = SpecialWave.power;
+        enemyList.Add(enemy);
+        gm.MobCounter(true);
+    }
+
+    private IEnumerator SpawnEnemy(int idx)
     {
         int spawnEnemyCount = 0;
 
         while (spawnEnemyCount < currentWave.maxEnemyCount)
         {   
            // 몹 바꾸려면 여기서 바꿔주면 됨
-            GameObject clone = Instantiate(currentWave.enemyPrefabs[0], transform);
+            GameObject clone = Instantiate(enemyPrefabs[idx], transform);
             Enemy enemy = clone.GetComponent<Enemy>();
             enemy.pathString = currentWave.pathString;
             enemy.mobHP = currentWave.mobHP * playerCnt;
-            enemy.isBoss = currentWave.isBoss;
-            if (enemy.isBoss) { enemy.transform.GetChild(0).transform.localScale *= 2f; }
+            //enemy.isBoss = currentWave.isBoss;
+            //if (enemy.isBoss) { enemy.transform.GetChild(0).transform.localScale *= 2f; }
             enemy.lifePenalty = currentWave.lifePenalty;
             enemy.speed = currentWave.speed;
             enemy.armor = currentWave.armor;
@@ -71,11 +93,15 @@ public class EnemySpawner : MonoBehaviour
             enemyList.Add(enemy);
             spawnEnemyCount++;
             Instantiate(SpawnEffect, clone.transform.position, Quaternion.identity);
-
+            Debug.Log("여기올텐데");
             gm.MobCounter(true);
+            if (spawnEnemyCount == currentWave.maxEnemyCount)
+            {
+                gm.isEndWave = true;
+            }
             yield return new WaitForSeconds(currentWave.spawnTime);
         }
-        gm.isEndWave = true;
+        // gm.isEndWave = true;
         // 임시방편으로 이렇게 해놈
         // enemyList = new List<Enemy>();
     }
