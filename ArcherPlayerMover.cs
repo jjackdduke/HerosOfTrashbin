@@ -16,14 +16,16 @@ public class ArcherPlayerMover : MonoBehaviour
 
 
     public Image skillFilter;
-     
+
+    private PlayerStat playerStat;
+   
+
     
     // 회전 속도
     //[SerializeField] float rotateSpeed = 10.0f;
 
     Animator anim;
     Rigidbody rigid;
-    ArcherPlayer archerPlayerStat;
 
     float h, v;
 
@@ -49,10 +51,18 @@ public class ArcherPlayerMover : MonoBehaviour
                                 
     float skillDelay = 10f;
     int shotCnt = 10;
-    public float skillCoolTime = 4f; // 스킬 쿨타임 정하는 곳 
+    public float skillCoolTime = 4f; // 스킬 쿨타임 정하는 곳
     public TextMeshProUGUI coolTimeCounter;
 
     private float currentCoolTime;
+
+
+    // 오디오
+    AudioSource audioSource;
+    public AudioClip audioShoot;
+    public AudioClip audioArrowSkill;
+    public AudioClip audioWalk;
+    public AudioClip audioRun;
 
     void Start()
     {
@@ -60,9 +70,10 @@ public class ArcherPlayerMover : MonoBehaviour
         anim = GetComponent<Animator>();
         equipWeapon = GetComponentInChildren<Weapon>();
         rigid = GetComponent<Rigidbody>();
-        archerPlayerStat = GetComponent<ArcherPlayer>();
+        playerStat = GameObject.Find("Player").GetComponent<PlayerStat>();
         jumpPower = 20f;
         skillFilter.fillAmount = 0;
+        audioSource = GetComponent<AudioSource>();
 
 
     }
@@ -120,7 +131,6 @@ public class ArcherPlayerMover : MonoBehaviour
 
         if (fDown && isFireReady)
         {
-            anim.SetBool("IsFire", false);
             anim.SetBool("IsFire", true);
             if(equipWeapon.type == Weapon.Type.Range)
             {
@@ -149,7 +159,7 @@ public class ArcherPlayerMover : MonoBehaviour
 
         //anim.SetBool("IsFire", false);
 
-        moveSpeed = archerPlayerStat.CurrentSpeed;
+        moveSpeed = playerStat.CurrentStatus(2);
         float local_moveSpeed = moveSpeed;
 
         moveVec = new Vector3(h, 0, v);
@@ -175,16 +185,8 @@ public class ArcherPlayerMover : MonoBehaviour
         if (!isBorder)
             transform.position += moveVec * local_moveSpeed * Time.deltaTime;
 
-        // 스킬샷 도중이라면 이동 애니메이션으로 바뀌지 않는다
-        if (anim.GetCurrentAnimatorStateInfo(0).IsName("MultiShot"))
-        {
-            return;
-        }
-        else
-        {
             anim.SetBool("IsMove", moveVec != Vector3.zero);
             anim.SetBool("IsRun", isRun);
-        }
         
     }
 
@@ -201,9 +203,9 @@ public class ArcherPlayerMover : MonoBehaviour
         {
             
             rigid.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
-            anim.SetBool("isJump", true);
+
             anim.SetBool("IsFire", false);
-            //anim.SetTrigger("IsJump");
+
 
 
             isJump = true;
@@ -215,17 +217,15 @@ public class ArcherPlayerMover : MonoBehaviour
     {
         if (collision.gameObject.layer == LayerMask.NameToLayer("Terrain"))
         {
-            
-            //anim.SetTrigger("IsLand");
-            anim.SetBool("isJump", false);
-
             isJump = false;
         }
     }
 
     public void ArrowFire()
     {
+        audioSource.PlayOneShot(audioShoot);
         equipWeapon.fireAnimation();
+        
     }
 
     public void AnimEvent_FireEnd()
@@ -234,6 +234,12 @@ public class ArcherPlayerMover : MonoBehaviour
         equipWeapon.fireEndAnimation();
     }
 
+
+
+    public void MultiShotAnim_Start()
+    {
+        audioSource.PlayOneShot(audioArrowSkill);
+    }
 
 
     public void MultiShotAnim_End(int cnt)
@@ -255,6 +261,23 @@ public class ArcherPlayerMover : MonoBehaviour
         }
     }
 
+    public void Walking_Start()
+    {
+        audioSource.clip = audioWalk;
+        audioSource.Play();
+    }
+
+    public void Running_Start()
+    {
+        audioSource.clip = audioRun;
+        audioSource.Play();
+    }
+
+    public void Idle_Start()
+    {
+
+        audioSource.Pause();
+    }
 
     IEnumerator Cooltime()
     {
@@ -282,5 +305,7 @@ public class ArcherPlayerMover : MonoBehaviour
         coolTimeCounter.text = "";
         yield break;
     }
+
+   
 
 }

@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
 public class ActionContollrer : MonoBehaviour
@@ -24,9 +21,15 @@ public class ActionContollrer : MonoBehaviour
 
     private UserEventController userEventController;
 
+    private BGM bgmController;
+
+    private MiniMapController miniMapController;
+
     void Start()
     {
         userEventController = GameObject.Find("EventManager").GetComponent<UserEventController>();
+        bgmController = GameObject.Find("BGM").GetComponent<BGM>();
+        miniMapController = GameObject.Find("MiniMapCamera").GetComponent<MiniMapController>();
     }
 
     void Update()
@@ -77,6 +80,7 @@ public class ActionContollrer : MonoBehaviour
                 }   
                 break;
 
+
         }
 
         //if(other.gameObject.tag == "Item")
@@ -105,6 +109,16 @@ public class ActionContollrer : MonoBehaviour
                 userEventController.EventInfoDisappear();
 
                 break;
+
+
+            case "BackgroundChange":
+                Debug.Log("배경음악 Change");
+                string stageInfo = other.name;
+                bgmController.ChangeBgm(stageInfo);
+                miniMapController.ChangeCam(stageInfo);
+                break;
+
+
 
         }
     }

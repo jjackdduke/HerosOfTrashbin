@@ -4,24 +4,48 @@ using UnityEngine;
 
 public class PlayerStat : MonoBehaviour
 {
+    GameObject totalManager;
+    ItemController itemController;
 
-    // Ä³¸¯ÅÍ status
+    [SerializeField] private float[] playerDamage;
+    [SerializeField] private float[] playerMoveSpeed;
+    [SerializeField] private float[] playerAttackRange;
 
-
-    // ¿ÜºÎ ½ºÅ©¸³Æ®¿¡¼­ Á¢±ÙÇÏ´Â º¯¼öµé
-    public float CurrentDamage { get { return playerDamage; } }
-    public float CurrentSpeed { get { return playerSpeed; } }
-
-
-    public float playerDamage;
-    public float playerSpeed;
+    [SerializeField] private float[] weaponDamage;
 
 
-    
 
-    // Update is called once per frame
-    void Update()
+    private float[] statusArray;
+
+    private void Awake()
     {
-        
+        playerDamage = new float[] {10f, 5f };
+        playerMoveSpeed = new float[] { 20f, 30f };
+        playerAttackRange = new float[] { 10f, 10f };
+
+        weaponDamage = new float[] { };
+
+        totalManager = GameObject.Find("Manager").gameObject;
+        itemController = totalManager.transform.Find("ItemManager").GetComponent<ItemController>();
+
+        statusArray = new float[101];
+        statusArray[1] = playerDamage[0];
+        statusArray[2] = playerMoveSpeed[0];
     }
+    private void Start()
+    {
+        // ì‹œì‘í•˜ë©´ ì§ì—…ì— ë”°ë¼ì„œ ê°–ê³ ì˜¨ë‹¤. ì§€ê¸ˆì€ ì„ì‹œ
+        
+        Debug.Log("statusArray : " + statusArray[2]);
+    }
+
+    public float CurrentStatus(int order)
+    {
+
+        return statusArray[order] * itemController.getTotalStack(order);
+
+    }
+
+
+
 }

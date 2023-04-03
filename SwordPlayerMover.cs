@@ -14,7 +14,6 @@ public class SwordPlayerMover : MonoBehaviour
     [SerializeField] private float moveSpeed;
     [SerializeField] private float jumpPower;
 
-
     
     // 회전 속도
     //[SerializeField] float rotateSpeed = 10.0f;
@@ -50,6 +49,13 @@ public class SwordPlayerMover : MonoBehaviour
     public TextMeshProUGUI coolTimeCounter;
     private float currentCoolTime;
 
+    // 오디오
+    public AudioSource audioSource;
+    public AudioClip audioSwing1;
+    public AudioClip audioSwing2;
+    public AudioClip audioWhirlwind;
+    public AudioClip audioWalk;
+    public AudioClip audioRun;
 
     void Start()
     {
@@ -57,7 +63,7 @@ public class SwordPlayerMover : MonoBehaviour
         anim = GetComponent<Animator>();
         equipWeapon = GetComponentInChildren<Weapon>();
         rigid = GetComponent<Rigidbody>();
-        playerStat = GameObject.Find("SwordPlayerBody").GetComponent<PlayerStat>();
+        playerStat = GameObject.Find("Player").GetComponent<PlayerStat>();
         jumpPower = 20f;
 
     }
@@ -158,7 +164,7 @@ public class SwordPlayerMover : MonoBehaviour
         }
 
 
-        moveSpeed = playerStat.CurrentSpeed;
+        moveSpeed = playerStat.CurrentStatus(2);
         float local_moveSpeed = moveSpeed;
 
         moveVec = new Vector3(h, 0, v);
@@ -222,6 +228,8 @@ public class SwordPlayerMover : MonoBehaviour
 
     public void Swing1_Start()
     {
+        audioSource.clip = audioSwing1;
+        audioSource.Play();
         equipWeapon.SwingAnimation();
     }
 
@@ -230,8 +238,23 @@ public class SwordPlayerMover : MonoBehaviour
         equipWeapon.SwingEndAnimation();
     }
 
+    public void Swing2_Start()
+    {
+        audioSource.clip = audioSwing2;
+        audioSource.Play();
+        equipWeapon.SwingAnimation();
+    }
+
+
+    public void Swing2_End()
+    {
+        equipWeapon.SwingEndAnimation();
+    }
+
     public void Whirlwind_Start()
     {
+        audioSource.clip = audioWhirlwind;
+        audioSource.Play();
         equipWeapon.WhirlwindAnimation();
     }
 
@@ -242,7 +265,7 @@ public class SwordPlayerMover : MonoBehaviour
         if (swingCnt <= 0)
         {
 
-            anim.SetBool("IsWhirlwind", false);
+            audioSource.Pause();
             StartCoroutine("Cooltime");
             currentCoolTime = skillCoolTime;
             coolTimeCounter.text = "" + currentCoolTime;
@@ -256,6 +279,23 @@ public class SwordPlayerMover : MonoBehaviour
         
     }
 
+    public void Walking_Start()
+    {
+        audioSource.clip = audioWalk;
+        audioSource.Play();
+    }
+
+    public void Running_Start()
+    {
+        audioSource.clip = audioRun;
+        audioSource.Play();
+    }
+
+    public void Idle_Start()
+    {
+        equipWeapon.SwingEndAnimation();
+        audioSource.Pause();
+    }
 
     IEnumerator Cooltime()
     {
