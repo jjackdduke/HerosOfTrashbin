@@ -56,8 +56,9 @@ public class Enemy : MonoBehaviourPunCallbacks
     [SerializeField] GameObject hpbar;
     [SerializeField] GameObject damageText;
 
-    // 피격이펙트
+    // 피격이펙트, 사운드
     ParticleSystem HitEffects;
+    
 
     // 보스 status
     public bool isBoss = false;
@@ -81,7 +82,7 @@ public class Enemy : MonoBehaviourPunCallbacks
         pathGO = GameObject.Find(pathString);
         gm = FindObjectOfType<GM>();
         //anim = GetComponentInChildren<Animator>();
-
+        
         currentHP = mobHP;
         currentSpeed = speed;
         currentArmor = armor;
@@ -336,7 +337,10 @@ public class Enemy : MonoBehaviourPunCallbacks
     {
         yield return new WaitForSeconds(4f);
         deBuffedSpeed = false;
-        currentSpeed = speed;
+        if (currentSpeed != 0)
+        {
+            currentSpeed = speed;
+        }
     }
 
     IEnumerator isDeBuffedArmor()
@@ -348,6 +352,9 @@ public class Enemy : MonoBehaviourPunCallbacks
 
     private IEnumerator Skill_KnockBack(float range = 100, float power = 50, float coolDown = 3)
     {
+        yield return new WaitForSeconds(0.01f);
+        anim.SetBool("isSkill", false);
+        yield return new WaitForSeconds(0.667f);
         redCircle.Stop();
         currentSpeed = speed;
         GameObject[] players;
@@ -368,6 +375,9 @@ public class Enemy : MonoBehaviourPunCallbacks
     }
     private IEnumerator Skill_Heeling(float range = 100, float power = 1000, float coolDown = 3)
     {
+        yield return new WaitForSeconds(0.01f);
+        anim.SetBool("isSkill", false);
+        yield return new WaitForSeconds(0.667f);
         GameObject[] enemies;
         enemies = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (GameObject enemy in enemies)
@@ -390,6 +400,9 @@ public class Enemy : MonoBehaviourPunCallbacks
     }
     private IEnumerator Skill_Stun(float range = 100, float power = 50, float coolDown = 3)
     {
+        yield return new WaitForSeconds(0.01f);
+        anim.SetBool("isSkill", false);
+        yield return new WaitForSeconds(0.667f);
         redCircle.Stop();
         currentSpeed = speed;
         GameObject[] players;
@@ -424,15 +437,16 @@ public class Enemy : MonoBehaviourPunCallbacks
                 redCircle.transform.localScale = new Vector3(range / 2, 1, range / 2);
                 redCircle.Play();
                 yield return new WaitForSeconds(3f);
-                anim.SetTrigger("skill");
-                //StartCoroutine(Skill_KnockBack(range, power, coolDown));
+                anim.SetBool("isSkill", true);
+                StartCoroutine(Skill_KnockBack(range, power, coolDown));
             }
             else if (skillIdx == 1)
             {
                 greenCircle.transform.localScale = new Vector3(range / 3, 1, range / 3);
                 greenCircle.Play();
-                yield return new WaitForSeconds(3f);
-                //StartCoroutine(Skill_Heeling(range, power, coolDown));
+                //yield return new WaitForSeconds(3f);
+                anim.SetBool("isSkill", true);
+                StartCoroutine(Skill_Heeling(range, power, coolDown));
             }
             else if (skillIdx == 2)
             {
@@ -440,7 +454,8 @@ public class Enemy : MonoBehaviourPunCallbacks
                 redCircle.transform.localScale = new Vector3(range / 3, 1, range / 3);
                 redCircle.Play();
                 yield return new WaitForSeconds(3f);
-                //StartCoroutine(Skill_Stun(range, power, coolDown));
+                anim.SetBool("isSkill", true);
+                StartCoroutine(Skill_Stun(range, power, coolDown));
             }
             yield return new WaitForSeconds(coolDown);
         }
