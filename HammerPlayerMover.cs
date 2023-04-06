@@ -1,12 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class HammerPlayerMover : MonoBehaviour
 {
     // 이동 속도
     [SerializeField] private float moveSpeed;
     [SerializeField] private float jumpPower;
+
+    GMForPhoton gm;
 
 
     // 회전 속도
@@ -26,6 +30,7 @@ public class HammerPlayerMover : MonoBehaviour
     bool isBorder;
     bool shiftPressed;
     bool jDown;
+    bool resetDown;
 
     bool isJump;
     bool isRun;
@@ -37,23 +42,32 @@ public class HammerPlayerMover : MonoBehaviour
 
     float fireDelay;
     float skillDelay = 10f;
-    [SerializeField] public float skillCoolTime = 1f; // 스킬 쿨타임 정하는 곳 
+    public float skillCoolTime; // 스킬 쿨타임 정하는 곳 
     int swingCnt = 10;
-    //public Image skillFilter;
-    //public TextMeshProUGUI coolTimeCounter;
+    public Image skillFilter;
+    public TextMeshProUGUI coolTimeCounter;
     private float currentCoolTime;
 
     // 오디오
     public AudioSource audioSource;
-    public AudioClip audioSwing1;
-    public AudioClip audioSwing2;
+    public AudioClip audioSwingLeft;
+    public AudioClip audioSwingRight;
     public AudioClip audioWhirlwind;
-    public AudioClip audioWalk;
-    public AudioClip audioRun;
+    public AudioClip audioCrash;
+    public AudioClip audioLeftWalk;
+    public AudioClip audioRightWalk;
+    public AudioClip audioLeftRun;
+    public AudioClip audioRightRun;
+    public AudioClip audioSkillLeft;
+    public AudioClip audioSkillRight;
+    public AudioClip audioWhirlwind2;
+    public AudioClip audiojump;
+    public GameObject crashEffect;
+    public Transform crashPos;
 
     void Start()
     {
-
+        gm = FindObjectOfType<GMForPhoton>();
         anim = GetComponent<Animator>();
         equipWeapon = GetComponentsInChildren<Weapon>();
         rigid = GetComponent<Rigidbody>();
@@ -77,6 +91,7 @@ public class HammerPlayerMover : MonoBehaviour
         Move();
         Jump();
         Rotate();
+        ResetPos();
 
 
 
@@ -97,7 +112,15 @@ public class HammerPlayerMover : MonoBehaviour
         fDown = Input.GetButtonDown("Fire1");
         jDown = Input.GetButtonDown("Jump");
         skillDown = Input.GetButtonDown("Fire2");
+        resetDown = Input.GetKey(KeyCode.R);
 
+    }
+    void ResetPos()
+    {
+        if (resetDown)
+        {
+            transform.position = gm.nowStage.transform.position + new Vector3(0, 7, 0);
+        }
     }
 
     void FreezeRotation()
@@ -137,11 +160,8 @@ public class HammerPlayerMover : MonoBehaviour
         {
             anim.applyRootMotion = true;
             anim.SetTrigger("hammerSkill");
-            //swingCnt = 10;
-            //skillFilter.fillAmount = 1;
-            //anim.SetBool("IsWhirlwind", true);
-            //equipWeapon.UseSkill();
-            //skillDelay = 0;
+            skillFilter.fillAmount = 1;
+            skillDelay = 0;
         }
 
 
@@ -214,25 +234,36 @@ public class HammerPlayerMover : MonoBehaviour
     }
 
 
-    public void Hammer1_Start()
+    public void Hammer1_Left()
     {
-        audioSource.clip = audioSwing1;
-        audioSource.Play();
-        equipWeapon[0].HammerComboAnimation();
+        
+        audioSource.PlayOneShot(audioSwingLeft);
         equipWeapon[1].HammerComboAnimation();
 
     }
 
-    public void Hammer1_End()
+    public void Hammer1_Right()
     {
-        equipWeapon[0].HammerComboEndAnimation();
+        audioSource.PlayOneShot(audioSwingRight);
+        equipWeapon[0].HammerComboAnimation();
+    }
+
+
+    public void Hammer1_LeftEnd()
+    {
         equipWeapon[1].HammerComboEndAnimation();
     }
 
+    public void Hammer1_RIghtEnd()
+    {
+        equipWeapon[0].HammerComboEndAnimation();
+    }
+
+
     public void Hammer2_Start()
     {
-        audioSource.clip = audioSwing2;
-        audioSource.Play();
+        //audioSource.clip = audioSwing2;
+        audioSource.PlayOneShot(audioSwingLeft);
         equipWeapon[0].HammerComboAnimation();
         equipWeapon[1].HammerComboAnimation();
     }
@@ -246,23 +277,38 @@ public class HammerPlayerMover : MonoBehaviour
 
     public void Hammer3_Start()
     {
-        audioSource.clip = audioSwing2;
-        audioSource.Play();
+        //audioSource.clip = audioSwing2;
+        audioSource.PlayOneShot(audioSwingRight);
         equipWeapon[0].HammerComboAnimation();
         equipWeapon[1].HammerComboAnimation();
+    }
+
+    public void Hammer3_LeftHit()
+    {
+        //audioSource.clip = audioSwing2;
+        audioSource.PlayOneShot(audioSwingLeft);
+       
+    }
+
+    public void Hammer3_RightHit()
+    {
+        //audioSource.clip = audioSwing2;
+        audioSource.PlayOneShot(audioSwingRight);
+
     }
 
 
     public void Hammer3_End()
     {
+        audioSource.PlayOneShot(audioSwingLeft);
         equipWeapon[0].HammerComboEndAnimation();
         equipWeapon[1].HammerComboEndAnimation();
     }
 
     public void Hammer4_Start()
     {
-        audioSource.clip = audioSwing2;
-        audioSource.Play();
+        //audioSource.clip = audioSwing2;
+        audioSource.PlayOneShot(audioWhirlwind);
         equipWeapon[0].HammerComboAnimation();
         equipWeapon[1].HammerComboAnimation();
     }
@@ -277,42 +323,33 @@ public class HammerPlayerMover : MonoBehaviour
     public void HammerSkill1_Start()
     {
         anim.SetBool("IsSkill", true);
-        audioSource.clip = audioWhirlwind;
-        audioSource.Play();
+        audioSource.PlayOneShot(audioSwingRight);
         equipWeapon[0].HammerSkillStartAnimation();
-        equipWeapon[1].HammerSkillStartAnimation();
     }
 
 
     public void HammerSkill1_End()
     {
-        audioSource.clip = audioWhirlwind;
-        audioSource.Play();
         equipWeapon[0].HammerSkillEndAnimation();
-        equipWeapon[1].HammerSkillEndAnimation();
     }
 
     public void HammerSkill2_Start()
     {
-        audioSource.clip = audioWhirlwind;
-        audioSource.Play();
+        audioSource.PlayOneShot(audioSkillRight);
         equipWeapon[0].HammerSkillStartAnimation();
-        equipWeapon[1].HammerSkillStartAnimation();
     }
 
 
     public void HammerSkill2_End()
     {
-        audioSource.clip = audioWhirlwind;
-        audioSource.Play();
         equipWeapon[0].HammerSkillEndAnimation();
-        equipWeapon[1].HammerSkillEndAnimation();
+
     }
 
     public void HammerSkill3_Start()
     {
-        audioSource.clip = audioWhirlwind;
-        audioSource.Play();
+        audioSource.PlayOneShot(audioSkillLeft);
+        audioSource.PlayOneShot(audioSwingRight);
         equipWeapon[0].HammerSkillStartAnimation();
         equipWeapon[1].HammerSkillStartAnimation();
     }
@@ -320,8 +357,6 @@ public class HammerPlayerMover : MonoBehaviour
 
     public void HammerSkill3_End()
     {
-        audioSource.clip = audioWhirlwind;
-        audioSource.Play();
         equipWeapon[0].HammerSkillEndAnimation();
         equipWeapon[1].HammerSkillEndAnimation();
     }
@@ -329,8 +364,8 @@ public class HammerPlayerMover : MonoBehaviour
 
     public void HammerSkill4_Start()
     {
-        audioSource.clip = audioWhirlwind;
-        audioSource.Play();
+
+        audioSource.PlayOneShot(audioWhirlwind2);
         equipWeapon[0].HammerSkillStartAnimation();
         equipWeapon[1].HammerSkillStartAnimation();
     }
@@ -338,17 +373,19 @@ public class HammerPlayerMover : MonoBehaviour
 
     public void HammerSkill4_End()
     {
-        audioSource.clip = audioWhirlwind;
-        audioSource.Play();
         equipWeapon[0].HammerSkillEndAnimation();
         equipWeapon[1].HammerSkillEndAnimation();
     }
 
-
+    public void Jump_Start()
+    {
+        audioSource.PlayOneShot(audiojump);
+    }
     public void HammerSkill5_Start()
     {
-        audioSource.clip = audioWhirlwind;
-        audioSource.Play();
+
+        audioSource.PlayOneShot(audioCrash);
+        Instantiate(crashEffect, crashPos.position, Quaternion.identity);
         equipWeapon[0].HammerSkillFinalAnimation();
         equipWeapon[1].HammerSkillFinalAnimation();
     }
@@ -356,11 +393,11 @@ public class HammerPlayerMover : MonoBehaviour
 
     public void HammerSkill5_End()
     {
-        audioSource.Pause();
-        //StartCoroutine("Cooltime");
+         
+        StartCoroutine("Cooltime");
         currentCoolTime = skillCoolTime;
-        //coolTimeCounter.text = "" + currentCoolTime;
-        //StartCoroutine("CoolTimeCounter");
+        coolTimeCounter.text = "" + currentCoolTime;
+        StartCoroutine("CoolTimeCounter");
         skillDelay = 0;
         equipWeapon[0].HammerSkillFinalEndAnimation();
         equipWeapon[1].HammerSkillFinalEndAnimation();
@@ -368,15 +405,27 @@ public class HammerPlayerMover : MonoBehaviour
 
     
 
-    public void Walking_Start()
+    public void Walking_Left()
     {
-        audioSource.clip = audioWalk;
+        audioSource.clip = audioLeftWalk;
         audioSource.Play();
     }
 
-    public void Running_Start()
+    public void Walking_Right()
     {
-        audioSource.clip = audioRun;
+        audioSource.clip = audioRightWalk;
+        audioSource.Play();
+    }
+
+    public void Running_Left()
+    {
+        audioSource.clip = audioLeftRun;
+        audioSource.Play();
+    }
+
+    public void Running_Right()
+    {
+        audioSource.clip = audioRightRun;
         audioSource.Play();
     }
 
@@ -385,33 +434,35 @@ public class HammerPlayerMover : MonoBehaviour
         equipWeapon[0].HammerSkillEndAnimation();
         equipWeapon[1].HammerSkillEndAnimation();
         anim.applyRootMotion = false;
-        audioSource.Pause();
+        //audioSource.Pause();
     }
 
-    //IEnumerator Cooltime()
-    //{
-    //    while (skillFilter.fillAmount > 0)
-    //    {
-    //        skillFilter.fillAmount -= 1 * Time.smoothDeltaTime / skillCoolTime;
+    IEnumerator Cooltime()
+    {
+        while (skillFilter.fillAmount > 0)
+        {
+            skillFilter.fillAmount -= 1 * Time.smoothDeltaTime / skillCoolTime;
 
-    //        yield return null;
-    //    }
+            yield return null;
+        }
 
-    //    yield break;
+        yield break;
 
-    //}
+    }
 
 
-    //IEnumerator CoolTimeCounter()
-    //{
-    //    while (currentCoolTime > 0)
-    //    {
-    //        yield return new WaitForSeconds(1.0f);
-    //        currentCoolTime -= 1.0f;
-    //        coolTimeCounter.text = "" + currentCoolTime;
-    //    }
+    IEnumerator CoolTimeCounter()
+    {
+        while (currentCoolTime > 0)
+        {
+            yield return new WaitForSeconds(1.0f);
+            currentCoolTime -= 1.0f;
+            coolTimeCounter.text = "" + currentCoolTime;
+        }
 
-    //    coolTimeCounter.text = "";
-    //    yield break;
-    //}
+        coolTimeCounter.text = "";
+        yield break;
+    }
+
+    
 }
