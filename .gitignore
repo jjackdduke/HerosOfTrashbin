@@ -38,3 +38,6 @@ out/
 
 # Spring
 #/build.gradle
+
+## 폴더 무시
+exec/
